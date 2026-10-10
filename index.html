@@ -89,7 +89,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="tailwind.css?v=2026.10.10-4" onload="__twReady()" onerror="__twFallback()">
+  <link rel="stylesheet" href="tailwind.css?v=2026.10.11-1" onload="__twReady()" onerror="__twFallback()">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Leaflet GIS Map Library -->
@@ -903,7 +903,7 @@
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
     const VIEW_KEY = 'konohana_map_view_v1';
-    const APP_VERSION = '2026.10.10-4';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.11-1';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -1763,7 +1763,6 @@
         </div>`;
 
       // 階ごとの部屋ボタン
-      const anyTime = roomData.floors.some(fl => fl.rooms.some(rm => rm.result && shortTime(rm.date)));
       roomData.floors.forEach((fl, fi) => {
         const label = floorLabel(fl);
         html += `<div class="mb-3">`;
@@ -1777,8 +1776,7 @@
             <button type="button" onclick="openRoomPicker(${fi}, ${ri})" class="rounded-xl border px-1 py-2 text-center transition active:scale-95 ${rm._busy ? 'opacity-60' : ''}" style="background:${st.bg};border-color:${st.bd};color:${st.tx};">
               <div class="text-sm font-bold leading-tight">${esc(rm.label)}</div>
               <div class="text-xs font-bold leading-tight mt-0.5">${rm.result ? esc(rm.result) : '—'}</div>
-              <div class="text-[10px] leading-tight opacity-80 h-3">${rm._pending ? '<i class="fas fa-cloud-arrow-up text-[9px]"></i> 送信待ち' : esc(dateText)}</div>
-              ${anyTime ? `<div class="text-[10px] leading-tight opacity-80 h-3">${rm._pending ? '' : esc(timeText)}</div>` : ''}
+              <div class="text-[10px] leading-tight opacity-80 h-3 whitespace-nowrap">${rm._pending ? '<i class="fas fa-cloud-arrow-up text-[9px]"></i> 送信待ち' : esc(dateText + (timeText ? ' ' + timeText : ''))}</div>
             </button>`;
         }).join('');
         html += `</div></div>`;
