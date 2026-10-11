@@ -89,7 +89,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="tailwind.css?v=2026.10.11-1" onload="__twReady()" onerror="__twFallback()">
+  <link rel="stylesheet" href="tailwind.css?v=2026.10.11-2" onload="__twReady()" onerror="__twFallback()">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Leaflet GIS Map Library -->
@@ -310,7 +310,7 @@
         <i class="fas fa-pen-to-square text-emerald-600 w-4"></i>
         <span>報告</span>
       </button>
-      <button id="adminMenuBtn" onclick="toggleAdminMode()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
+      <button onclick="toggleAdminMode()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
         <i id="adminMenuIcon" class="fas fa-lock text-slate-500 w-4"></i>
         <span id="adminMenuLabel">管理者モード</span>
       </button>
@@ -869,9 +869,7 @@
     let currentDetailId = null;
 
     let hasAppliedDataOnce = false;
-    let restoredView = false;
     let isInitialLoading = false;
-    let mapViewTimer = null;
 
     const CURRENT_LOCATION_ZOOM = 16;
 
@@ -902,8 +900,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const VIEW_KEY = 'konohana_map_view_v1';
-    const APP_VERSION = '2026.10.11-1';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.11-2';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -973,12 +970,6 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
-    }
-
-    function safeUrl(url) {
-      if (!url) return '';
-      const trimmed = String(url).trim();
-      return /^https?:\/\//i.test(trimmed) ? trimmed : '';
     }
 
     function normalizeText(s) {
@@ -1433,10 +1424,6 @@
     const ROOM_STYLE_OTHER = { bg: '#ede9fe', bd: '#c4b5fd', tx: '#5b21b6' };
     const ROOM_STYLE_NONE = { bg: '#ffffff', bd: '#e2e8f0', tx: '#475569' };
 
-    function isGoogleSheetsUrl(url) {
-      return /^https?:\/\/docs\.google\.com\/spreadsheets\/d\/[a-zA-Z0-9_-]+/i.test(String(url || ''));
-    }
-
     function roomStyle(result) {
       if (!result) return ROOM_STYLE_NONE;
       return ROOM_STYLES[result] || ROOM_STYLE_OTHER;
@@ -1595,14 +1582,10 @@
         }
         onDone(res);
       };
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(done)
-          .withFailureHandler((err) => done({ success: false, error: (err && err.message) || '通信エラー' }))
-          .getAdminRoomLinks(userAuthPassword, pw);
-      } else {
-        done({ success: true, links: {}, mainUrl: '' });
-      }
+      google.script.run
+        .withSuccessHandler(done)
+        .withFailureHandler((err) => done({ success: false, error: (err && err.message) || '通信エラー' }))
+        .getAdminRoomLinks(userAuthPassword, pw);
     }
 
     function submitAdminPassword(e) {
@@ -1675,22 +1658,10 @@
         renderRoomSheet();
       };
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(handle)
-          .withFailureHandler((err) => handle({ success: false, error: (err && err.message) || '通信エラー' }))
-          .getRoomSheet(userAuthPassword, roomRef);
-      } else {
-        // テスト環境（GASの外）用の見本データ
-        setTimeout(() => handle({
-          success: true,
-          notes: ['（チラシなどの無断投函禁止）と記載あり。'],
-          floors: [
-            { r: 4, rooms: [101, 102, 103, 104].map((n, i) => ({ r: 4, c: 1 + i * 2, label: String(n), date: i < 2 ? '2026/09/03' : '', result: i === 0 ? '会' : (i === 1 ? '留' : '') })) },
-            { r: 6, rooms: [201, 202, 203].map((n, i) => ({ r: 6, c: 1 + i * 2, label: String(n), date: '', result: '' })) }
-          ]
-        }), 500);
-      }
+      google.script.run
+        .withSuccessHandler(handle)
+        .withFailureHandler((err) => handle({ success: false, error: (err && err.message) || '通信エラー' }))
+        .getRoomSheet(userAuthPassword, roomRef);
     }
 
     function renderRoomSheet() {
@@ -1963,14 +1934,10 @@
 
     // サーバーへ1件送る共通処理。cb(res, networkFailed)
     function sendRoomRecord(ref, room, result, date, cb) {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler((res) => cb(res, false))
-          .withFailureHandler((err) => cb({ success: false, error: (err && err.message) || '通信エラー' }, !!(err && err.network)))
-          .setRoomResult(userAuthPassword, ref, { r: room.r, c: room.c, label: room.label }, result, date || '');
-      } else {
-        cb({ success: true, date: date || '', result: result }, false);
-      }
+      google.script.run
+        .withSuccessHandler((res) => cb(res, false))
+        .withFailureHandler((err) => cb({ success: false, error: (err && err.message) || '通信エラー' }, !!(err && err.network)))
+        .setRoomResult(userAuthPassword, ref, { r: room.r, c: room.c, label: room.label }, result, date || '');
     }
 
     let pendingFlushing = false;
@@ -2251,7 +2218,7 @@
     function discardLoginToken() {
       const token = storageGet(TOKEN_KEY);
       storageRemove(TOKEN_KEY);
-      if (token && typeof google !== 'undefined' && google.script && google.script.run) {
+      if (token) {
         try { google.script.run.revokeLoginToken(token); } catch (e) { /* 何もしない */ }
       }
     }
@@ -2259,8 +2226,6 @@
     function tryAutoLogin() {
       const token = storageGet(TOKEN_KEY);
       if (!token) return;
-      if (!(typeof google !== 'undefined' && google.script && google.script.run)) return;
-
       setAutoLoginState(true);
       google.script.run
         .withSuccessHandler((res) => {
@@ -2326,48 +2291,34 @@
         document.getElementById("loginBtnText").textContent = "ログイン";
       };
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            resetBtn();
-            if (res && res.success) {
-              userAuthPassword = pwd;
-              storePasswordHash(pwd);
-              if (keepLogin && res.token) {
-                storageSet(TOKEN_KEY, res.token);
-              } else if (!keepLogin) {
-                discardLoginToken();
-              }
-              onLoginSuccess();
-            } else {
-              showLoginError(res && res.error ? res.error : "パスワードが正しくありません");
-            }
-          })
-          .withFailureHandler(async () => {
-            resetBtn();
-            const ok = await tryOfflineLogin(pwd);
-            if (ok) {
-              userAuthPassword = pwd;
-              onLoginSuccess();
-              showToast("通信できないため、前回のデータで起動しました", false);
-            } else {
-              showLoginError("通信エラーが発生しました");
-            }
-          })
-          .checkPassword(pwd, keepLogin);
-      } else {
-        const host = location.hostname;
-        const isLocalTest = (host === 'localhost' || host === '127.0.0.1' || host === '');
-        setTimeout(() => {
+      google.script.run
+        .withSuccessHandler((res) => {
           resetBtn();
-          if (isLocalTest && pwd.length > 0) {
+          if (res && res.success) {
             userAuthPassword = pwd;
+            storePasswordHash(pwd);
+            if (keepLogin && res.token) {
+              storageSet(TOKEN_KEY, res.token);
+            } else if (!keepLogin) {
+              discardLoginToken();
+            }
             onLoginSuccess();
           } else {
-            showLoginError("このページはGASのWebアプリURLから開いてください");
+            showLoginError(res && res.error ? res.error : "パスワードが正しくありません");
           }
-        }, 300);
-      }
+        })
+        .withFailureHandler(async () => {
+          resetBtn();
+          const ok = await tryOfflineLogin(pwd);
+          if (ok) {
+            userAuthPassword = pwd;
+            onLoginSuccess();
+            showToast("通信できないため、前回のデータで起動しました", false);
+          } else {
+            showLoginError("通信エラーが発生しました");
+          }
+        })
+        .checkPassword(pwd, keepLogin);
     }
 
     // ログインのたびに、前回の操作（絞り込み・検索・並べ替え・開いていた画面）をリセットする。
@@ -2379,7 +2330,6 @@
       sortByDistance = false;
       pendingSearchFit = false;
       hasAppliedDataOnce = false;
-      restoredView = false;
       ['mansionSearchInput', 'searchWindowInput'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = '';
@@ -2594,37 +2544,27 @@
         submitBtn.innerHTML = `<i class="fas fa-paper-plane text-xs"></i> <span>送信</span>`;
       };
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            resetSubmit();
-            if (res && res.success) {
-              closeReportModal();
-              showToast("報告を送信しました", false);
-              document.getElementById("reportName").value = "";
-              document.getElementById("reportCategory").value = "";
-              document.getElementById("reportDetails").value = "";
-              document.getElementById("reportDetails").placeholder = "詳細を入力";
-              reportTarget = null;
-              updateReportTargetUI();
-            } else {
-              showToast("送信失敗: " + (res ? res.error : "エラーが発生しました"), false);
-            }
-          })
-          .withFailureHandler((err) => {
-            resetSubmit();
-            showToast("通信エラー: " + (err.message || err.toString()), false);
-          })
-          .submitReport(userAuthPassword, reportData);
-      } else {
-        setTimeout(() => {
+      google.script.run
+        .withSuccessHandler((res) => {
           resetSubmit();
-          closeReportModal();
-          showToast("報告を送信しました（テスト動作）", false);
-          reportTarget = null;
-          updateReportTargetUI();
-        }, 600);
-      }
+          if (res && res.success) {
+            closeReportModal();
+            showToast("報告を送信しました", false);
+            document.getElementById("reportName").value = "";
+            document.getElementById("reportCategory").value = "";
+            document.getElementById("reportDetails").value = "";
+            document.getElementById("reportDetails").placeholder = "詳細を入力";
+            reportTarget = null;
+            updateReportTargetUI();
+          } else {
+            showToast("送信失敗: " + (res ? res.error : "エラーが発生しました"), false);
+          }
+        })
+        .withFailureHandler((err) => {
+          resetSubmit();
+          showToast("通信エラー: " + (err.message || err.toString()), false);
+        })
+        .submitReport(userAuthPassword, reportData);
     }
 
     // ============================================================
@@ -2639,7 +2579,6 @@
       if (map) return;
 
       // 前回の地図位置は使わない（ログインのたびに全マンションが収まる表示から始める）
-      restoredView = false;
       const center = [34.682, 135.452];
       const zoom = 14;
 
@@ -2683,22 +2622,10 @@
       showToast(isInitialLoading ? "データを読み込んでいます..." : "最新データを確認中...", true);
       if (isInitialLoading) renderDrawerList();
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(onDataLoaded)
-          .withFailureHandler(onDataError)
-          .getMansionData(userAuthPassword, !!force);
-      } else {
-        setTimeout(() => {
-          onDataLoaded({
-            success: true,
-            data: [
-              { id: 1, name: "サンプルプレサンス此花 (急ぎ)", address: "大阪市此花区四貫島1-1", hasRoom: true, lat: 34.682, lng: 135.452, sheetName: "フロタン", row: 2, isUrgent: true, note: "訪問拒否、外国語" },
-              { id: 2, name: "福島グランドハイツ", address: "大阪市福島区海老江2-1", hasRoom: true, lat: 34.690, lng: 135.465, sheetName: "海老江", row: 2, isUrgent: false, note: "" }
-            ]
-          });
-        }, 600);
-      }
+      google.script.run
+        .withSuccessHandler(onDataLoaded)
+        .withFailureHandler(onDataError)
+        .getMansionData(userAuthPassword, !!force);
     }
 
     function onDataError(err) {
@@ -2741,7 +2668,7 @@
         currentSheetFilter = '';
       }
 
-      const shouldFit = !hasAppliedDataOnce && !restoredView;
+      const shouldFit = !hasAppliedDataOnce;
       hasAppliedDataOnce = true;
 
       updateCountsUI();
@@ -3330,7 +3257,6 @@
         if (btn) { btn.disabled = false; btn.textContent = 'この位置で保存'; }
         showToast('保存できませんでした' + (msg ? '：' + msg : ''), false);
       };
-      if (!(typeof google !== 'undefined' && google.script && google.script.run)) { fail('テスト環境では保存できません'); return; }
 
       google.script.run
         .withSuccessHandler((res) => {
@@ -3381,7 +3307,6 @@
       };
 
       const step = (offset) => {
-        if (!(typeof google !== 'undefined' && google.script && google.script.run)) { fail('テスト環境では確認できません'); return; }
         google.script.run
           .withSuccessHandler((res) => {
             if (run !== adminCheckRun) return;
