@@ -583,9 +583,6 @@
         <button type="button" id="set-map-positron" onclick="applyMapType('positron')" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5">
           <i class="fas fa-sun"></i><span>CARTO 淡色</span>
         </button>
-        <button type="button" id="set-map-maptiler" onclick="applyMapType('maptiler')" style="display:none" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5">
-          <i class="fas fa-location-dot"></i><span>MapTiler 日本語</span>
-        </button>
         <button type="button" id="set-map-voyager" onclick="applyMapType('voyager')" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5">
           <i class="fas fa-compass"></i><span>CARTO 標準</span>
         </button>
@@ -924,7 +921,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.11-5';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.11-3';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -950,7 +947,7 @@
       const f = storageGet(FONT_KEY);
       if (f === 'large' || f === 'normal') fontSize = f;
       const t = storageGet(MAPTYPE_KEY);
-      if (['standard', 'pale', 'photo', 'positron', 'voyager', 'maptiler'].includes(t)) mapType = t;
+      if (['standard', 'pale', 'photo', 'positron', 'voyager'].includes(t)) mapType = t;
       keepLogin = (storageGet(KEEP_KEY) === '1') || !!storageGet(TOKEN_KEY);
       // 以前の版で保存していた「最近開いたマンション」「前回の地図位置」は不要なので消す
       storageRemove('konohana_recent_v1');
@@ -961,14 +958,22 @@
     // 共通ヘルパー
     // ============================================================
     const sheetColors = [
-      { bg: '#181e78', text: '#ffffff', badgeBg: '#e0e2f5', badgeText: '#181e78' },
-      { bg: '#de541e', text: '#ffffff', badgeBg: '#fde4d8', badgeText: '#9a3412' },
-      { bg: '#1896a2', text: '#ffffff', badgeBg: '#d5f0f3', badgeText: '#0f5f68' },
-      { bg: '#f6a83c', text: '#4a2c00', badgeBg: '#fdebd0', badgeText: '#7a4a00' },
-      { bg: '#065496', text: '#ffffff', badgeBg: '#d9e8f6', badgeText: '#065496' },
-      { bg: '#aeb442', text: '#2f3300', badgeBg: '#eef0c8', badgeText: '#5a5f12' },
-      { bg: '#065a60', text: '#ffffff', badgeBg: '#d3ebed', badgeText: '#065a60' },
-      { bg: '#feea46', text: '#4a4200', badgeBg: '#fff8c2', badgeText: '#6b5f00' }
+      { bg: '#2563eb', text: '#ffffff', badgeBg: '#dbeafe', badgeText: '#1e40af' },
+      { bg: '#dc2626', text: '#ffffff', badgeBg: '#fee2e2', badgeText: '#991b1b' },
+      { bg: '#059669', text: '#ffffff', badgeBg: '#d1fae5', badgeText: '#065f46' },
+      { bg: '#d97706', text: '#ffffff', badgeBg: '#fef3c7', badgeText: '#92400e' },
+      { bg: '#7c3aed', text: '#ffffff', badgeBg: '#ede9fe', badgeText: '#5b21b6' },
+      { bg: '#db2777', text: '#ffffff', badgeBg: '#fce7f3', badgeText: '#9d174d' },
+      { bg: '#0891b2', text: '#ffffff', badgeBg: '#cffaff', badgeText: '#155e75' },
+      { bg: '#65a30d', text: '#ffffff', badgeBg: '#ecfccb', badgeText: '#3f6212' },
+      { bg: '#ea580c', text: '#ffffff', badgeBg: '#ffedd5', badgeText: '#9a3412' },
+      { bg: '#4f46e5', text: '#ffffff', badgeBg: '#e0e7ff', badgeText: '#3730a3' },
+      { bg: '#0284c7', text: '#ffffff', badgeBg: '#e0f2fe', badgeText: '#075985' },
+      { bg: '#16a34a', text: '#ffffff', badgeBg: '#dcfce7', badgeText: '#166534' },
+      { bg: '#9333ea', text: '#ffffff', badgeBg: '#f3e8ff', badgeText: '#6b21a8' },
+      { bg: '#c026d3', text: '#ffffff', badgeBg: '#fae8ff', badgeText: '#86198f' },
+      { bg: '#e11d48', text: '#ffffff', badgeBg: '#ffe4e6', badgeText: '#9f1239' },
+      { bg: '#475569', text: '#ffffff', badgeBg: '#f1f5f9', badgeText: '#334155' }
     ];
     const sheetColorMap = {};
     let colorIndex = 0;
@@ -1071,13 +1076,7 @@
     const cartoUrl = (style) => 'https://basemaps.cartocdn.com/rastertiles/' + style + '/{z}/{x}/{y}{r}.png' + (CARTO_API_KEY ? '?key=' + encodeURIComponent(CARTO_API_KEY) : '');
     const CARTO_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
 
-    // MapTiler（無料・カード不要）。キーを発行したら下の '' の中に貼る。空のままならボタンは表示されません
-    const MAPTILER_API_KEY = '';
-    const maptilerUrl = (style) => 'https://api.maptiler.com/maps/' + style + '/256/{z}/{x}/{y}.png?key=' + encodeURIComponent(MAPTILER_API_KEY);
-    const MAPTILER_ATTR = '<a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a>';
-
     const TILE_DEFS = {
-      maptiler: { url: maptilerUrl('jp-mierune-streets'), options: { maxZoom: 19, attribution: MAPTILER_ATTR }, carto: true },
       positron: { url: cartoUrl('light_all'), options: { maxZoom: 19, attribution: CARTO_ATTR }, carto: true },
       voyager:  { url: cartoUrl('voyager'),   options: { maxZoom: 19, attribution: CARTO_ATTR }, carto: true },
       standard: {
@@ -1095,7 +1094,7 @@
     };
 
     function applyMapType(type) {
-      if (!TILE_DEFS[type] || (type === 'maptiler' && !MAPTILER_API_KEY)) type = 'standard';
+      if (!TILE_DEFS[type]) type = 'standard';
       mapType = type;
       storageSet(MAPTYPE_KEY, type);
       if (map) {
@@ -1113,7 +1112,7 @@
           layer.on('tileerror', () => {
             errCount++;
             if (errCount >= 4 && okCount === 0 && baseLayer === layer && mapType === type) {
-              showToast('地図を読み込めませんでした。標準の地図に戻します', false);
+              showToast('CARTOの地図を読み込めませんでした。標準の地図に戻します', false);
               mapType = 'standard';
               storageSet(MAPTYPE_KEY, 'standard');
               map.removeLayer(layer);
@@ -1141,9 +1140,6 @@
       set('set-map-photo', mapType === 'photo', 'text-sm');
       set('set-map-positron', mapType === 'positron', 'text-xs');
       set('set-map-voyager', mapType === 'voyager', 'text-xs');
-      set('set-map-maptiler', mapType === 'maptiler', 'text-xs');
-      const mt = document.getElementById('set-map-maptiler');
-      if (mt) mt.style.display = MAPTILER_API_KEY ? '' : 'none';
     }
 
     function openSettingsSheet() {
