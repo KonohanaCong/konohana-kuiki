@@ -89,7 +89,7 @@
       };
     })();
   </script>
-  <link rel="stylesheet" href="tailwind.css?v=2026.10.11-2" onload="__twReady()" onerror="__twFallback()">
+  <link rel="stylesheet" href="tailwind.css?v=2026.10.11-3" onload="__twReady()" onerror="__twFallback()">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Leaflet GIS Map Library -->
@@ -309,6 +309,10 @@
       <button onclick="openReportModal()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
         <i class="fas fa-pen-to-square text-emerald-600 w-4"></i>
         <span>報告</span>
+      </button>
+      <button onclick="openStats()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
+        <i class="fas fa-chart-column text-sky-600 w-4"></i>
+        <span>訪問の統計</span>
       </button>
       <button onclick="toggleAdminMode()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
         <i id="adminMenuIcon" class="fas fa-lock text-slate-500 w-4"></i>
@@ -628,6 +632,23 @@
     </div>
   </div>
 
+  <!-- 訪問の統計（曜日・時間帯ごとの 会／留） -->
+  <div id="statsModal" class="hidden fixed inset-0 z-[10003] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeStats()">
+    <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 p-5 sm:p-6 pb-7 max-h-[90dvh] flex flex-col">
+      <div class="flex items-center justify-between mb-3 shrink-0">
+        <div class="flex items-center gap-2 text-slate-800 font-bold text-lg">
+          <i class="fas fa-chart-column text-sky-600"></i>
+          <span>訪問の統計</span>
+        </div>
+        <button type="button" onclick="closeStats()" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+      <div id="statsBody" class="flex-1 min-h-0 overflow-y-auto"></div>
+      <div id="statsFooter" class="mt-3 shrink-0"></div>
+    </div>
+  </div>
+
   <!-- ルート案内シート（地図アプリへ移動） -->
   <div id="routeSheet" class="hidden fixed inset-0 z-[10002] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeRouteSheet()">
     <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 p-5 sm:p-6 pb-7">
@@ -900,7 +921,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.11-2';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.11-3';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -1933,11 +1954,11 @@
     }
 
     // サーバーへ1件送る共通処理。cb(res, networkFailed)
-    function sendRoomRecord(ref, room, result, date, cb) {
+    function sendRoomRecord(ref, room, result, date, cb, opts) {
       google.script.run
         .withSuccessHandler((res) => cb(res, false))
         .withFailureHandler((err) => cb({ success: false, error: (err && err.message) || '通信エラー' }, !!(err && err.network)))
-        .setRoomResult(userAuthPassword, ref, { r: room.r, c: room.c, label: room.label }, result, date || '');
+        .setRoomResult(userAuthPassword, ref, { r: room.r, c: room.c, label: room.label }, result, date || '', opts || {});
     }
 
     let pendingFlushing = false;
@@ -1986,7 +2007,7 @@
           showToast(`送れない記録がありました（${item.room.label}号室：${(res && res.error) || '不明なエラー'}）`, false);
           if (pendingList().length) flushPending(false);
         }
-      });
+      }, { noLog: !!item.noLog });
     }
 
     // 選んだ結果を反映（画面を先に更新し、スプレッドシートへ書き込む。失敗したら元に戻す）
@@ -2061,7 +2082,7 @@
           showToast('元に戻しました', false);
         } else if (net) {
           if (rm) rm._pending = true;
-          addPending({ mkey: mkey, ref: ref, room: room, result: prev.result, date: sendDate, ts: Date.now() });
+          addPending({ mkey: mkey, ref: ref, room: room, result: prev.result, date: sendDate, ts: Date.now(), noLog: true });
           saveRoomToDisk(mkey, dataRef);
           showToast('電波がないため、端末に保管しました。つながると自動で送信します', false);
         } else {
@@ -2069,7 +2090,7 @@
           if (roomData === dataRef && roomKey === mkey) retryRoomLoad();
         }
         if (roomData === dataRef) renderRoomSheet();
-      });
+      }, { noLog: true });   // 元に戻す操作は、統計用の記録ログには残さない
     }
 
     // ============================================================
@@ -3181,6 +3202,250 @@
       if (f) f();
     }
 
+
+    // ============================================================
+    // 訪問の統計（曜日・時間帯ごとの 会／留）
+    // ============================================================
+    const WD_NAMES = ['日', '月', '火', '水', '木', '金', '土'];
+    const BAND_NAMES = ['午前', '昼', '午後', '夕方', '夜'];
+    const BAND_HINTS = ['〜10時台', '11〜13時台', '14〜16時台', '17〜19時台', '20時以降'];
+    const STATS_MIN_N = 5;          // これ未満の件数の枠は、参考値として扱う
+    const STAT_COLOR_A = '#059669';  // 会
+    const STAT_COLOR_B = '#0284c7';  // 留
+    let statsData = null;
+    let statsLoading = false;
+    let statsError = '';
+
+    function openStats() {
+      closeHamburgerMenu();
+      const el = document.getElementById('statsModal');
+      if (el) el.classList.remove('hidden');
+      loadStats();
+    }
+
+    function closeStats() {
+      const el = document.getElementById('statsModal');
+      if (el) el.classList.add('hidden');
+    }
+
+    function loadStats() {
+      statsLoading = true;
+      statsError = '';
+      renderStats();
+      google.script.run
+        .withSuccessHandler((res) => {
+          statsLoading = false;
+          if (res && res.success) { statsData = res; } else { statsError = (res && res.error) || '読み込めませんでした'; }
+          renderStats();
+        })
+        .withFailureHandler((err) => {
+          statsLoading = false;
+          statsError = (err && err.message) || '通信エラー';
+          renderStats();
+        })
+        .getVisitStats(userAuthPassword);
+    }
+
+    function requestStatsRebuild() {
+      if (!isAdminOn()) return;
+      showToast('更新を依頼しています…', true);
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res && res.success) showToast('更新を始めます。数分後に、もう一度開いてください', false);
+          else showToast('依頼できませんでした' + (res && res.error ? '：' + res.error : ''), false);
+        })
+        .withFailureHandler((err) => showToast('依頼できませんでした：' + ((err && err.message) || '通信エラー'), false))
+        .requestVisitDataRebuild(userAuthPassword, adminPasswordMem);
+    }
+
+    function statRate(a, b) { return (a + b) > 0 ? Math.round(a / (a + b) * 100) : null; }
+
+    function statBarRow(label, a, b, max) {
+      const r = statRate(a, b);
+      const wa = max > 0 ? a / max * 100 : 0;
+      const wb = max > 0 ? b / max * 100 : 0;
+      return `
+        <div class="flex items-center gap-2 text-[11px]">
+          <div class="w-10 shrink-0 font-bold text-slate-600 text-right">${esc(label)}</div>
+          <div class="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden flex">
+            <div style="width:${wa}%;background:${STAT_COLOR_A};"></div><div style="width:${wb}%;background:${STAT_COLOR_B};"></div>
+          </div>
+          <div class="w-28 shrink-0 text-right text-slate-500">会${a} / 留${b}${r !== null ? ' ・' + r + '%' : ''}</div>
+        </div>`;
+    }
+
+    function statSlotText(wd, band) {
+      return WD_NAMES[wd] + '曜 ' + BAND_NAMES[band];
+    }
+
+    // 「会」の割合が高い時間帯（件数が十分あるものだけ）を、高い順に並べる
+    function statGoodSlots(st) {
+      const list = [];
+      for (let wd = 0; wd < 7; wd++) {
+        for (let b = 0; b < 5; b++) {
+          const c = st.matrix[wd][b];
+          const n = c[0] + c[1];
+          if (n >= STATS_MIN_N) list.push({ wd: wd, band: b, rate: c[0] / n, n: n });
+        }
+      }
+      list.sort((x, y) => (y.rate - x.rate) || (y.n - x.n));
+      return list;
+    }
+
+    function statParseSlot(dt) {
+      const m = String(dt || '').match(/^(\d{4})\/(\d{2})\/(\d{2})(?: (\d{2}):(\d{2}))?$/);
+      if (!m) return null;
+      const wd = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getDay();
+      let band = -1;
+      if (m[4] !== undefined) {
+        const h = Number(m[4]);
+        band = h <= 10 ? 0 : (h <= 13 ? 1 : (h <= 16 ? 2 : (h <= 19 ? 3 : 4)));
+      }
+      return { wd: wd, band: band };
+    }
+
+    function statStayAdvice(st, goodSlots) {
+      const groups = {};
+      (st.stay || []).forEach(row => {
+        const key = row[0] + '#' + row[1];
+        if (!groups[key]) groups[key] = { sheet: row[0], name: row[1], rooms: [] };
+        groups[key].rooms.push({ label: row[2], slot: statParseSlot(row[3]) });
+      });
+      const list = Object.keys(groups).map(k => groups[k]);
+      list.sort((a, b) => b.rooms.length - a.rooms.length || String(a.name).localeCompare(String(b.name), 'ja'));
+      list.forEach(g => {
+        const avoidSlot = {}, avoidWd = {};
+        g.rooms.forEach(r => {
+          if (!r.slot) return;
+          if (r.slot.band >= 0) avoidSlot[r.slot.wd + '-' + r.slot.band] = true;
+          else avoidWd[r.slot.wd] = true;   // 時刻がない記録は、同じ曜日を避ける
+        });
+        g.advice = goodSlots.filter(x => !avoidSlot[x.wd + '-' + x.band] && !avoidWd[x.wd]).slice(0, 2);
+      });
+      return list;
+    }
+
+    function renderStats() {
+      const body = document.getElementById('statsBody');
+      const foot = document.getElementById('statsFooter');
+      if (!body || !foot) return;
+      const st = statsData;
+      let html = '';
+
+      if (statsError) html += `<div class="mb-3 p-3 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700">${esc(statsError)}</div>`;
+      if (statsLoading && !st) html += `<div class="text-xs text-slate-400 py-8 text-center"><i class="fas fa-circle-notch fa-spin mr-1.5"></i>集計しています...</div>`;
+
+      if (st) {
+        const total = st.total.a + st.total.b;
+        if (total === 0) {
+          html += `<div class="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-2xl p-4 leading-relaxed">
+            まだ集計できる記録がありません。${st.state ? '（データを作成中です：' + esc(st.state) + '）' : '管理者が、訪問データの作成を実行すると表示されます。'}</div>`;
+        } else {
+          const rate = statRate(st.total.a, st.total.b);
+          html += `
+            <div class="flex items-center gap-2 mb-4">
+              <span class="px-3 py-1.5 rounded-xl text-sm font-bold" style="background:#d1fae5;color:#065f46;">会 ${st.total.a}</span>
+              <span class="px-3 py-1.5 rounded-xl text-sm font-bold" style="background:#e0f2fe;color:#075985;">留 ${st.total.b}</span>
+              <span class="ml-auto text-xs text-slate-500">会の割合 <b class="text-slate-800 text-sm">${rate}%</b></span>
+            </div>`;
+
+          // 曜日別
+          const wdMax = Math.max.apply(null, st.weekday.map(x => x[0] + x[1]).concat([1]));
+          html += `<div class="text-[11px] font-bold text-slate-500 mb-1.5">曜日別</div><div class="space-y-1.5 mb-4">`;
+          for (let wd = 1; wd <= 7; wd++) { const d = wd % 7; html += statBarRow(WD_NAMES[d], st.weekday[d][0], st.weekday[d][1], wdMax); }
+          html += `</div>`;
+
+          // 時間別
+          const hours = Object.keys(st.hour).map(Number).sort((a, b) => a - b);
+          if (hours.length) {
+            const hMax = Math.max.apply(null, hours.map(h => st.hour[h][0] + st.hour[h][1]).concat([1]));
+            html += `<div class="text-[11px] font-bold text-slate-500 mb-1.5">時間別（時刻のある記録）</div><div class="space-y-1.5 mb-4">`;
+            for (let h = hours[0]; h <= hours[hours.length - 1]; h++) {
+              const c = st.hour[h] || [0, 0];
+              html += statBarRow(h + '時', c[0], c[1], hMax);
+            }
+            html += `</div>`;
+          }
+
+          // 曜日×時間帯
+          const rates = [];
+          st.matrix.forEach(row => row.forEach(c => { if (c[0] + c[1] >= STATS_MIN_N) rates.push(c[0] / (c[0] + c[1])); }));
+          const rMin = rates.length ? Math.min.apply(null, rates) : 0;
+          const rMax = rates.length ? Math.max.apply(null, rates) : 1;
+          html += `<div class="text-[11px] font-bold text-slate-500 mb-1.5">曜日 × 時間帯の「会」の割合</div>
+            <div class="overflow-x-auto mb-1"><table class="w-full text-center text-[11px] border-separate" style="border-spacing:3px;">
+            <thead><tr><th></th>${BAND_NAMES.map((n, i) => `<th class="font-bold text-slate-600 pb-0.5">${n}<div class="text-[9px] font-normal text-slate-400">${BAND_HINTS[i]}</div></th>`).join('')}</tr></thead><tbody>`;
+          for (let wd = 1; wd <= 7; wd++) {
+            const d = wd % 7;
+            html += `<tr><th class="font-bold text-slate-600 pr-1">${WD_NAMES[d]}</th>`;
+            for (let b = 0; b < 5; b++) {
+              const c = st.matrix[d][b];
+              const n = c[0] + c[1];
+              if (n === 0) {
+                html += `<td class="rounded-lg py-1.5 text-slate-300" style="background:#f8fafc;">—</td>`;
+              } else if (n < STATS_MIN_N) {
+                html += `<td class="rounded-lg py-1.5 text-slate-400" style="background:#f1f5f9;">${statRate(c[0], c[1])}%<div class="text-[9px]">${n}件</div></td>`;
+              } else {
+                const r = c[0] / n;
+                const t = rMax > rMin ? (r - rMin) / (rMax - rMin) : 0.5;
+                html += `<td class="rounded-lg py-1.5 font-bold" style="background:rgba(5,150,105,${(0.10 + 0.65 * t).toFixed(2)});color:${t > 0.6 ? '#ffffff' : '#064e3b'};">${Math.round(r * 100)}%<div class="text-[9px] font-normal opacity-80">${n}件</div></td>`;
+              }
+            }
+            html += `</tr>`;
+          }
+          html += `</tbody></table></div><div class="text-[10px] text-slate-400 mb-4">${STATS_MIN_N}件に満たない枠は灰色（参考値）です。</div>`;
+
+          // 会いやすい時間帯
+          const good = statGoodSlots(st);
+          if (good.length) {
+            html += `<div class="text-[11px] font-bold text-slate-500 mb-1.5">会いやすい時間帯</div><div class="flex flex-wrap gap-1.5 mb-4">` +
+              good.slice(0, 3).map((x, i) => `<span class="px-2.5 py-1 rounded-full text-xs font-bold" style="background:#d1fae5;color:#065f46;">${i + 1}. ${esc(statSlotText(x.wd, x.band))} ${Math.round(x.rate * 100)}%</span>`).join('') + `</div>`;
+          }
+
+          // 「留」の部屋：別の曜日・時間帯で
+          const advice = statStayAdvice(st, good);
+          html += `<div class="text-[11px] font-bold text-slate-500 mb-1.5">「留」の部屋を、別の時間帯で（${st.stayCount}室）</div>`;
+          if (!good.length) {
+            html += `<div class="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-xl p-3 mb-2">時刻のある記録がまだ少ないため、おすすめの時間帯は出せません。記録がたまると表示されます。</div>`;
+          }
+          html += `<div class="space-y-1.5">`;
+          advice.slice(0, 40).forEach(g => {
+            const mm = mansionDataList.find(x => x.sheetName === g.sheet && x.name === g.name);
+            const mapBtn = mm ? `<button type="button" onclick="showMansionOnMap(${Number(mm.id)})" class="shrink-0 text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-full px-2.5 py-1">地図</button>` : '';
+            const shown = g.rooms.slice(0, 6).map(r => esc(r.label) + (r.slot ? '(' + WD_NAMES[r.slot.wd] + (r.slot.band >= 0 ? ' ' + BAND_NAMES[r.slot.band] : '') + ')' : '')).join('　');
+            const more = g.rooms.length > 6 ? `　他${g.rooms.length - 6}室` : '';
+            const adv = g.advice.length
+              ? `<div class="text-xs font-bold mt-0.5" style="color:#047857;">おすすめ：${g.advice.map(x => esc(statSlotText(x.wd, x.band)) + '（' + Math.round(x.rate * 100) + '%）').join(' ／ ')}</div>`
+              : '';
+            html += `
+              <div class="p-2.5 rounded-xl border border-slate-200 bg-white flex items-start gap-2">
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-bold text-slate-800 truncate">${esc(g.name)}</div>
+                  <div class="text-[11px] text-slate-500 leading-snug">留 ${g.rooms.length}室：${shown}${more}</div>
+                  ${adv}
+                </div>${mapBtn}
+              </div>`;
+          });
+          if (!advice.length) html += `<div class="text-xs text-slate-400">「留」の部屋はありません。</div>`;
+          if (advice.length > 40) html += `<div class="text-[11px] text-slate-400 text-center pt-1">ほか ${advice.length - 40} マンション</div>`;
+          html += `</div>`;
+        }
+
+        html += `
+          <div class="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-200 text-[10px] text-slate-500 leading-relaxed">
+            ・曜日別は日付のある記録、時間別と時間帯の表は時刻のある記録だけを集計しています。<br>
+            ・シートに残っているのは各部屋の「最新の結果」だけなので、上書きされた過去の結果は含まれません。この機能の開始後にアプリで記録した分は、すべて「記録ログ」に残り、集計に加わります。<br>
+            ・「会の割合」は、会と留だけで計算しています（エラー・予約は除外）。<br>
+            ・データ作成：${st.builtAt ? esc(st.builtAt) : '未作成'}${st.state ? '（作成中 ' + esc(st.state) + '）' : ''} ／ 記録ログ ${st.logCount}件
+          </div>`;
+      }
+
+      body.innerHTML = html;
+      foot.innerHTML = isAdminOn()
+        ? `<button type="button" onclick="requestStatsRebuild()" class="w-full py-3 rounded-2xl text-sm font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 transition">データを最新にする（管理者・数分かかります）</button>`
+        : '';
+    }
+
     // ============================================================
     // 管理者：ピンの位置を直す
     // ============================================================
@@ -3353,6 +3618,7 @@
     // 登録内容の確認から、そのマンションを地図で開く
     function showMansionOnMap(id) {
       closeAdminCheck();
+      closeStats();
       if (isDrawerOpen) toggleMansionListDrawer();
       const m = findMansion(id);
       if (m && map) map.setView([m.lat, m.lng], 18);
