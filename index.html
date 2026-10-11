@@ -206,6 +206,37 @@
       100% { transform: scale(1.6); opacity: 0; }
     }
 
+
+    /* ===== ピン（新しい形） ===== */
+    .kpin { position: relative; width: 100%; height: 100%; }
+    .kpin-ring { position: absolute; left: 0; top: 0; border-radius: 50%; background: #ffffff; box-shadow: 0 3px 8px rgba(0,0,0,0.35); display: flex; align-items: center; justify-content: center; }
+    .kpin-core { border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+    .kpin-tail { position: absolute; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid #ffffff; filter: drop-shadow(0 2px 1px rgba(0,0,0,0.25)); }
+    .kpin-dot { position: absolute; left: 0; top: 0; border-radius: 50%; border: 2px solid #ffffff; box-shadow: 0 1px 4px rgba(0,0,0,0.45); box-sizing: border-box; }
+    .kpin-glow { box-shadow: 0 0 0 3px #fbbf24, 0 0 12px 4px rgba(251,191,36,0.85) !important; animation: kpinGlow 1.6s ease-in-out infinite; }
+    @keyframes kpinGlow { 0%,100% { box-shadow: 0 0 0 3px #fbbf24, 0 0 6px 2px rgba(251,191,36,0.6); } 50% { box-shadow: 0 0 0 4px #f59e0b, 0 0 16px 6px rgba(245,158,11,0.95); } }
+    .kpin-note { position: absolute; top: -4px; left: -5px; width: 15px; height: 15px; background: #dc2626; color: #fff; border-radius: 50%; border: 2px solid #fff; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; z-index: 5; }
+    .kpin-label { position: absolute; left: 100%; top: 6px; margin-left: 3px; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; font-weight: 800; color: #1e293b; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 4px #fff; pointer-events: none; }
+    .kpin-sel .kpin { transform: scale(1.3); transform-origin: 50% 100%; transition: transform .15s; }
+    .mansion-pin-icon { transition: opacity .2s; }
+
+    /* ===== スマホ用：ヘッダー・下の操作バー ===== */
+    #mobileBar { display: none; }
+    @media (max-width: 639px) {
+      #appHeader { position: absolute; top: 0; left: 0; right: 0; flex-direction: row !important; align-items: center; gap: .5rem !important; padding: .4rem .6rem !important; transition: transform .28s ease; }
+      body.admin-on #appHeader { top: 1.5rem; }
+      #appHeader.hdr-hide { transform: translateY(-140%); }
+      #appHeader .hdr-row1 { display: contents; }
+      #appHeader .hdr-brand { order: 1; }
+      #appHeader #headerAreaFilter { order: 2; flex: 1 1 0%; width: auto !important; min-width: 0; padding-top: 0 !important; }
+      #appHeader #headerControls { order: 3; }
+      .hdr-desk { display: none !important; }
+      #hamburgerDropdown { top: 3.4rem !important; }
+      .leaflet-control-zoom { display: none !important; }
+      #statusToast { bottom: 6rem !important; }
+      #mobileBar.on { display: flex; }
+    }
+
     /* 検索窓：ブラウザ標準の「×」は消し、自前の×だけを使う */
     input[type="search"]::-webkit-search-cancel-button,
     input[type="search"]::-webkit-search-decoration { -webkit-appearance: none; appearance: none; display: none; }
@@ -266,9 +297,9 @@
   </div>
 
   <!-- 上部ヘッダー -->
-  <header class="bg-white text-slate-800 px-3.5 sm:px-4 pt-2.5 pb-2 flex flex-col gap-2 shadow-sm z-[9999] shrink-0 relative border-b border-slate-100 btn-touch-ui">
-    <div class="flex items-center justify-between w-full gap-2">
-      <div class="flex items-center gap-2 shrink-0">
+  <header id="appHeader" class="bg-white text-slate-800 px-3.5 sm:px-4 pt-2.5 pb-2 flex flex-col gap-2 shadow-sm z-[9999] shrink-0 relative border-b border-slate-100 btn-touch-ui">
+    <div class="hdr-row1 flex items-center justify-between w-full gap-2">
+      <div class="hdr-brand flex items-center gap-2 shrink-0">
         <!-- ヘッダーアイコン (SVG) -->
         <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm shrink-0 overflow-hidden border border-slate-200">
           <svg viewBox="0 0 512 512" class="w-full h-full">
@@ -277,7 +308,7 @@
             <text x="256" y="424" fill="#0e4d45" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" font-weight="800" font-size="38" letter-spacing="3" text-anchor="middle">KONOHANA KUIKI</text>
           </svg>
         </div>
-        <div class="flex flex-col shrink-0">
+        <div class="hidden sm:flex flex-col shrink-0">
           <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-800 whitespace-nowrap leading-tight">此花区域</h1>
           <span class="text-[9px] sm:text-[10px] tracking-[0.22em] font-semibold text-[#13685e] whitespace-nowrap leading-none mt-0.5">KONOHANA KUIKI</span>
         </div>
@@ -285,12 +316,12 @@
 
       <div id="headerControls" class="hidden flex items-center justify-end gap-1">
         <button id="btnSearch" onclick="openSearchScreen()" aria-label="検索" title="検索"
-          class="relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-base transition flex items-center justify-center w-10 h-10 bg-transparent">
+          class="hdr-desk relative p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 rounded-xl text-base transition flex items-center justify-center w-10 h-10 bg-transparent">
           <i class="fas fa-search"></i>
           <span id="searchBadge" class="hidden absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
         </button>
         <button onclick="moveToCurrentLocation()" aria-label="現在地に移動" title="現在地に移動"
-          class="p-2 text-white bg-[#13685e] hover:bg-[#0e524a] active:bg-[#0a3f39] rounded-xl text-base transition flex items-center justify-center w-10 h-10 shadow-sm">
+          class="hdr-desk p-2 text-white bg-[#13685e] hover:bg-[#0e524a] active:bg-[#0a3f39] rounded-xl text-base transition flex items-center justify-center w-10 h-10 shadow-sm">
           <i class="fas fa-crosshairs"></i>
         </button>
         <button id="btnHamburger" onclick="toggleHamburgerMenu(event)" aria-label="メニューを開く" title="メニュー"
@@ -347,7 +378,7 @@
         </button>
       </div>
 
-      <div class="relative shrink-0 flex items-center pl-1">
+      <div class="hdr-desk relative shrink-0 flex items-center pl-1">
         <div class="absolute right-full top-0 bottom-0 w-5 bg-gradient-to-l from-white to-transparent pointer-events-none"></div>
         <button onclick="openFilterSheet()" id="header-tab-FILTER" class="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all text-slate-700 bg-white border border-slate-300 whitespace-nowrap text-center shrink-0 flex items-center gap-1">
           <i class="fas fa-sliders text-[10px] sm:text-[11px]"></i>
@@ -463,10 +494,28 @@
     <div id="map"></div>
 
     <!-- フローティング「一覧」切り替えボタン -->
-    <div class="absolute top-4 right-4 z-20 btn-touch-ui">
+    <div class="hidden sm:block absolute top-4 right-4 z-20 btn-touch-ui">
       <button onclick="toggleMansionListDrawer()" id="btnList" aria-label="マンション一覧を開く" class="px-4 py-2.5 rounded-full text-xs font-bold transition-all text-white bg-[#13685e] hover:bg-[#0e524a] active:bg-[#0a3f39] whitespace-nowrap text-center shrink-0 shadow-lg border border-white/20 flex items-center justify-center gap-1.5">
         <i class="fas fa-list text-xs"></i>
         <span>一覧</span>
+      </button>
+    </div>
+
+
+    <!-- スマホ用：下の操作バー -->
+    <div id="mobileBar" class="absolute left-1/2 -translate-x-1/2 bottom-4 z-20 bg-white/95 backdrop-blur rounded-full shadow-xl border border-slate-200 px-1.5 py-1 gap-0.5 items-center btn-touch-ui">
+      <button type="button" onclick="openSearchScreen()" aria-label="検索" class="relative w-[62px] py-1.5 rounded-full flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <i class="fas fa-search text-base"></i><span class="text-[10px] font-bold mt-0.5">検索</span>
+        <span id="searchBadgeM" class="hidden absolute top-1 right-3 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
+      </button>
+      <button type="button" id="mobileFilterBtn" onclick="openFilterSheet()" aria-label="絞込" class="relative w-[62px] py-1.5 rounded-full flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <i class="fas fa-sliders text-base"></i><span id="filterChipLabelM" class="text-[10px] font-bold mt-0.5 max-w-[56px] truncate">絞込</span>
+      </button>
+      <button type="button" onclick="moveToCurrentLocation()" aria-label="現在地" class="w-[62px] py-1.5 rounded-full flex flex-col items-center text-white bg-[#13685e] active:bg-[#0a3f39]">
+        <i class="fas fa-crosshairs text-base"></i><span class="text-[10px] font-bold mt-0.5">現在地</span>
+      </button>
+      <button type="button" onclick="toggleMansionListDrawer()" id="mobileListBtn" aria-label="一覧" class="w-[62px] py-1.5 rounded-full flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <i class="fas fa-list text-base" id="mobileListIcon"></i><span class="text-[10px] font-bold mt-0.5" id="mobileListLabel">一覧</span>
       </button>
     </div>
 
@@ -569,6 +618,15 @@
         <button type="button" id="set-font-large" onclick="applyFontSize('large')" class="py-3 rounded-xl text-base font-bold border transition">大きい</button>
       </div>
 
+      <div class="text-[11px] font-bold text-slate-500 mb-1.5">ピンの色</div>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" id="set-pin-status" onclick="applyPinMode('status')" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5"><i class="fas fa-flag"></i><span>訪問状況</span></button>
+        <button type="button" id="set-pin-elapsed" onclick="applyPinMode('elapsed')" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5"><i class="fas fa-clock"></i><span>経過日数</span></button>
+        <button type="button" id="set-pin-area" onclick="applyPinMode('area')" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5"><i class="fas fa-draw-polygon"></i><span>エリア</span></button>
+        <button type="button" id="set-pin-sheet" onclick="applyPinMode('sheet')" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5"><i class="fas fa-palette"></i><span>シート別</span></button>
+      </div>
+      <div id="pinLegend" class="mt-2 mb-4 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-slate-600"></div>
+
       <div class="text-[11px] font-bold text-slate-500 mb-1.5">地図の種類</div>
       <div class="grid grid-cols-3 gap-2">
         <button type="button" id="set-map-standard" onclick="applyMapType('standard')" class="py-3 rounded-xl text-sm font-bold border transition flex items-center justify-center gap-1.5">
@@ -582,6 +640,9 @@
         </button>
         <button type="button" id="set-map-positron" onclick="applyMapType('positron')" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5">
           <i class="fas fa-sun"></i><span>CARTO 淡色</span>
+        </button>
+        <button type="button" id="set-map-maptiler" onclick="applyMapType('maptiler')" style="display:none" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5">
+          <i class="fas fa-location-dot"></i><span>MapTiler 日本語</span>
         </button>
         <button type="button" id="set-map-voyager" onclick="applyMapType('voyager')" class="py-3 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5">
           <i class="fas fa-compass"></i><span>CARTO 標準</span>
@@ -921,12 +982,18 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.11-3';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.11-6';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
     const FONT_KEY = 'konohana_font_size';
     const MAPTYPE_KEY = 'konohana_map_type_v2';
+    const PINMODE_KEY = 'konohana_pin_mode_v1';
+    const SUMMARY_KEY = 'konohana_summary_v1';
+    let pinColorMode = 'status';     // ピンの色の付け方：status / elapsed / area / sheet
+    let visitSummary = {};           // マンションごとの訪問の集計（サーバーから取得）
+    let pinTier = 'dot';
+    let hdrTimer = null;
     const TOKEN_KEY = 'konohana_login_token_v1';
     const KEEP_KEY = 'konohana_keep_login_v1';
 
@@ -947,7 +1014,10 @@
       const f = storageGet(FONT_KEY);
       if (f === 'large' || f === 'normal') fontSize = f;
       const t = storageGet(MAPTYPE_KEY);
-      if (['standard', 'pale', 'photo', 'positron', 'voyager'].includes(t)) mapType = t;
+      if (['standard', 'pale', 'photo', 'positron', 'voyager', 'maptiler'].includes(t)) mapType = t;
+      const pm = storageGet(PINMODE_KEY);
+      if (['status', 'elapsed', 'area', 'sheet'].includes(pm)) pinColorMode = pm;
+      try { const sj = storageGet(SUMMARY_KEY); if (sj) visitSummary = JSON.parse(sj) || {}; } catch (e) { visitSummary = {}; }
       keepLogin = (storageGet(KEEP_KEY) === '1') || !!storageGet(TOKEN_KEY);
       // 以前の版で保存していた「最近開いたマンション」「前回の地図位置」は不要なので消す
       storageRemove('konohana_recent_v1');
@@ -958,22 +1028,14 @@
     // 共通ヘルパー
     // ============================================================
     const sheetColors = [
-      { bg: '#2563eb', text: '#ffffff', badgeBg: '#dbeafe', badgeText: '#1e40af' },
-      { bg: '#dc2626', text: '#ffffff', badgeBg: '#fee2e2', badgeText: '#991b1b' },
-      { bg: '#059669', text: '#ffffff', badgeBg: '#d1fae5', badgeText: '#065f46' },
-      { bg: '#d97706', text: '#ffffff', badgeBg: '#fef3c7', badgeText: '#92400e' },
-      { bg: '#7c3aed', text: '#ffffff', badgeBg: '#ede9fe', badgeText: '#5b21b6' },
-      { bg: '#db2777', text: '#ffffff', badgeBg: '#fce7f3', badgeText: '#9d174d' },
-      { bg: '#0891b2', text: '#ffffff', badgeBg: '#cffaff', badgeText: '#155e75' },
-      { bg: '#65a30d', text: '#ffffff', badgeBg: '#ecfccb', badgeText: '#3f6212' },
-      { bg: '#ea580c', text: '#ffffff', badgeBg: '#ffedd5', badgeText: '#9a3412' },
-      { bg: '#4f46e5', text: '#ffffff', badgeBg: '#e0e7ff', badgeText: '#3730a3' },
-      { bg: '#0284c7', text: '#ffffff', badgeBg: '#e0f2fe', badgeText: '#075985' },
-      { bg: '#16a34a', text: '#ffffff', badgeBg: '#dcfce7', badgeText: '#166534' },
-      { bg: '#9333ea', text: '#ffffff', badgeBg: '#f3e8ff', badgeText: '#6b21a8' },
-      { bg: '#c026d3', text: '#ffffff', badgeBg: '#fae8ff', badgeText: '#86198f' },
-      { bg: '#e11d48', text: '#ffffff', badgeBg: '#ffe4e6', badgeText: '#9f1239' },
-      { bg: '#475569', text: '#ffffff', badgeBg: '#f1f5f9', badgeText: '#334155' }
+      { bg: '#181e78', text: '#ffffff', badgeBg: '#e0e2f5', badgeText: '#181e78' },
+      { bg: '#de541e', text: '#ffffff', badgeBg: '#fde4d8', badgeText: '#9a3412' },
+      { bg: '#1896a2', text: '#ffffff', badgeBg: '#d5f0f3', badgeText: '#0f5f68' },
+      { bg: '#f6a83c', text: '#4a2c00', badgeBg: '#fdebd0', badgeText: '#7a4a00' },
+      { bg: '#065496', text: '#ffffff', badgeBg: '#d9e8f6', badgeText: '#065496' },
+      { bg: '#aeb442', text: '#2f3300', badgeBg: '#eef0c8', badgeText: '#5a5f12' },
+      { bg: '#065a60', text: '#ffffff', badgeBg: '#d3ebed', badgeText: '#065a60' },
+      { bg: '#feea46', text: '#4a4200', badgeBg: '#fff8c2', badgeText: '#6b5f00' }
     ];
     const sheetColorMap = {};
     let colorIndex = 0;
@@ -1076,7 +1138,13 @@
     const cartoUrl = (style) => 'https://basemaps.cartocdn.com/rastertiles/' + style + '/{z}/{x}/{y}{r}.png' + (CARTO_API_KEY ? '?key=' + encodeURIComponent(CARTO_API_KEY) : '');
     const CARTO_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
 
+    // MapTiler（無料・カード不要）。キーを発行したら下の '' の中に貼る。空のままならボタンは表示されません
+    const MAPTILER_API_KEY = '';
+    const maptilerUrl = (style) => 'https://api.maptiler.com/maps/' + style + '/256/{z}/{x}/{y}.png?key=' + encodeURIComponent(MAPTILER_API_KEY);
+    const MAPTILER_ATTR = '<a href="https://www.maptiler.com/copyright/" target="_blank" rel="noopener">&copy; MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">&copy; OpenStreetMap contributors</a>';
+
     const TILE_DEFS = {
+      maptiler: { url: maptilerUrl('jp-mierune-streets'), options: { maxZoom: 19, attribution: MAPTILER_ATTR }, carto: true },
       positron: { url: cartoUrl('light_all'), options: { maxZoom: 19, attribution: CARTO_ATTR }, carto: true },
       voyager:  { url: cartoUrl('voyager'),   options: { maxZoom: 19, attribution: CARTO_ATTR }, carto: true },
       standard: {
@@ -1094,7 +1162,7 @@
     };
 
     function applyMapType(type) {
-      if (!TILE_DEFS[type]) type = 'standard';
+      if (!TILE_DEFS[type] || (type === 'maptiler' && !MAPTILER_API_KEY)) type = 'standard';
       mapType = type;
       storageSet(MAPTYPE_KEY, type);
       if (map) {
@@ -1112,7 +1180,7 @@
           layer.on('tileerror', () => {
             errCount++;
             if (errCount >= 4 && okCount === 0 && baseLayer === layer && mapType === type) {
-              showToast('CARTOの地図を読み込めませんでした。標準の地図に戻します', false);
+              showToast('地図を読み込めませんでした。標準の地図に戻します', false);
               mapType = 'standard';
               storageSet(MAPTYPE_KEY, 'standard');
               map.removeLayer(layer);
@@ -1135,11 +1203,16 @@
       };
       set('set-font-normal', fontSize === 'normal', 'text-sm');
       set('set-font-large', fontSize === 'large', 'text-base');
+      ['status','elapsed','area','sheet'].forEach(k => set('set-pin-' + k, pinColorMode === k, 'text-xs'));
+      renderPinLegend();
       set('set-map-standard', mapType === 'standard', 'text-sm');
       set('set-map-pale', mapType === 'pale', 'text-sm');
       set('set-map-photo', mapType === 'photo', 'text-sm');
       set('set-map-positron', mapType === 'positron', 'text-xs');
       set('set-map-voyager', mapType === 'voyager', 'text-xs');
+      set('set-map-maptiler', mapType === 'maptiler', 'text-xs');
+      const mt = document.getElementById('set-map-maptiler');
+      if (mt) mt.style.display = MAPTILER_API_KEY ? '' : 'none';
     }
 
     function openSettingsSheet() {
@@ -1329,6 +1402,7 @@
       const sheet = document.getElementById('detailSheet');
       sheet.scrollTop = 0;
       sheet.classList.add('open');
+      applyPinSelection();
       requestAnimationFrame(() => panMarkerIntoView(m));
     }
 
@@ -1336,6 +1410,7 @@
       currentDetailId = null;
       const sheet = document.getElementById('detailSheet');
       if (sheet) sheet.classList.remove('open');
+      if (typeof applyPinSelection === 'function') applyPinSelection();
     }
 
     function panMarkerIntoView(m) {
@@ -1956,7 +2031,7 @@
     // サーバーへ1件送る共通処理。cb(res, networkFailed)
     function sendRoomRecord(ref, room, result, date, cb, opts) {
       google.script.run
-        .withSuccessHandler((res) => cb(res, false))
+        .withSuccessHandler((res) => { if (res && res.success) scheduleSummaryRefresh(); cb(res, false); })
         .withFailureHandler((err) => cb({ success: false, error: (err && err.message) || '通信エラー' }, !!(err && err.network)))
         .setRoomResult(userAuthPassword, ref, { r: room.r, c: room.c, label: room.label }, result, date || '', opts || {});
     }
@@ -2181,6 +2256,10 @@
       if (!btn || !label) return;
 
       label.textContent = currentSheetFilter ? currentSheetFilter : '絞込';
+      const labelM = document.getElementById('filterChipLabelM');
+      if (labelM) labelM.textContent = currentSheetFilter ? currentSheetFilter : '絞込';
+      const mfb = document.getElementById('mobileFilterBtn');
+      if (mfb) { mfb.classList.toggle('text-[#13685e]', !!currentSheetFilter); mfb.classList.toggle('bg-emerald-50', !!currentSheetFilter); }
 
       btn.className = currentSheetFilter
         ? "px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all text-white bg-[#13685e] border border-[#13685e] shadow-sm whitespace-nowrap text-center shrink-0 flex items-center gap-1"
@@ -2379,6 +2458,8 @@
         areaFilter.classList.remove("hidden");
         areaFilter.classList.add("flex");
       }
+      const mbar = document.getElementById('mobileBar');
+      if (mbar) mbar.classList.add('on');
 
       resetSessionState();
 
@@ -2438,6 +2519,8 @@
       lastListCoords = null;
 
       storageRemove(CACHE_KEY);
+      storageRemove(SUMMARY_KEY);
+      visitSummary = {};
       storageRemove(PWHASH_KEY);
       storageRemove(ROOM_CACHE_KEY);
       Object.keys(roomCache).forEach(k => { delete roomCache[k]; });
@@ -2467,6 +2550,8 @@
       showLoginNotice("ログアウトしました");
       document.getElementById("headerControls").classList.add("hidden");
       document.getElementById("headerAreaFilter").classList.add("hidden");
+      const mbar = document.getElementById('mobileBar');
+      if (mbar) mbar.classList.remove('on');
     }
 
     function toggleHamburgerMenu(e) {
@@ -2609,7 +2694,10 @@
 
       markersLayer = createMarkersLayer().addTo(map);
 
-      map.on('click', () => closeDetailSheet());
+      map.on('click', () => { closeDetailSheet(); setHdrHidden(false); });
+      map.on('dragstart', () => { clearTimeout(hdrTimer); if (!isDrawerOpen) setHdrHidden(true); });
+      map.on('dragend', () => { clearTimeout(hdrTimer); hdrTimer = setTimeout(() => setHdrHidden(false), 1800); });
+      map.on('zoomend', () => { if (getPinTier() !== pinTier) refreshPinIcons(); });
     }
 
     // ============================================================
@@ -2670,6 +2758,7 @@
       }
       applyMansionData(res.data || []);
       saveCachedMansions();
+      loadVisitSummary();
       refreshAdminLinksQuietly();
       showToast(`${mansionDataList.length}件のマンションを取得しました`, false);
     }
@@ -2804,36 +2893,193 @@
     // ============================================================
     // ピン・一覧
     // ============================================================
+    // ----- 訪問の集計（ピンの色分け用） -----
+    function summaryOf(m) {
+      return visitSummary[String(m.sheetName || '').trim() + '|' + String(m.name || '').trim()] || null;
+    }
+
+    function daysSince(dt) {
+      const mm = String(dt || '').match(/^(\d{4})\/(\d{2})\/(\d{2})/);
+      if (!mm) return null;
+      const d = new Date(Number(mm[1]), Number(mm[2]) - 1, Number(mm[3]));
+      return Math.floor((Date.now() - d.getTime()) / 86400000);
+    }
+
+    // 色モードごとの「色」と「文字色」を決める
+    function pinColorFor(m) {
+      const sm = summaryOf(m);
+      if (pinColorMode === 'status') {
+        if (!sm) return { bg: '#065496', text: '#ffffff' };                 // 未訪問
+        if (sm.b > 0) return { bg: '#f6a83c', text: '#4a2c00' };            // 「留」が残っている
+        return { bg: '#9aa7b5', text: '#ffffff' };                           // 済み
+      }
+      if (pinColorMode === 'elapsed') {
+        if (!sm || !sm.last) return { bg: '#181e78', text: '#ffffff' };     // 未訪問
+        const d = daysSince(sm.last);
+        if (d === null) return { bg: '#181e78', text: '#ffffff' };
+        if (d >= 60) return { bg: '#de541e', text: '#ffffff' };
+        if (d >= 30) return { bg: '#f6a83c', text: '#4a2c00' };
+        if (d >= 14) return { bg: '#feea46', text: '#4a4200' };
+        return { bg: '#b8c4d0', text: '#334155' };                           // 最近行った
+      }
+      if (pinColorMode === 'area') {
+        const a = getMansionArea(m);
+        if (a === '此花区') return { bg: '#3b82f6', text: '#ffffff' };
+        if (a === '福島区') return { bg: '#10b981', text: '#ffffff' };
+        return { bg: '#64748b', text: '#ffffff' };
+      }
+      return getSheetColor(m.sheetName);
+    }
+
+    const PIN_LEGENDS = {
+      status: [['#065496', '未訪問'], ['#f6a83c', '「留」が残っている'], ['#9aa7b5', '済み']],
+      elapsed: [['#181e78', '未訪問'], ['#de541e', '60日以上'], ['#f6a83c', '30日以上'], ['#feea46', '14日以上'], ['#b8c4d0', '最近行った']],
+      area: [['#3b82f6', '此花区'], ['#10b981', '福島区'], ['#64748b', 'その他']],
+      sheet: []
+    };
+
+    function renderPinLegend() {
+      const el = document.getElementById('pinLegend');
+      if (!el) return;
+      const items = PIN_LEGENDS[pinColorMode] || [];
+      let html = items.map(x => `<span class="inline-flex items-center gap-1"><span style="background:${x[0]};" class="inline-block w-3 h-3 rounded-full border border-white shadow"></span>${esc(x[1])}</span>`).join('');
+      if (!items.length) html = '<span>シート（マンションのまとまり）ごとの色です</span>';
+      html += '<span class="w-full text-slate-400">ピンの縁の輪：緑＝会、橙＝留（記録済みの部屋の割合）／光る輪＝急ぎ・優先</span>';
+      el.innerHTML = html;
+    }
+
+    function applyPinMode(mode) {
+      if (!PIN_LEGENDS[mode]) mode = 'status';
+      pinColorMode = mode;
+      storageSet(PINMODE_KEY, mode);
+      refreshPinIcons();
+      renderDrawerList(true);
+      updateSettingsUI();
+    }
+
+    function loadVisitSummary() {
+      if (!userAuthPassword) return;
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (!res || !res.success) return;
+          visitSummary = res.data || {};
+          try { storageSet(SUMMARY_KEY, JSON.stringify(visitSummary)); } catch (e) { /* 何もしない */ }
+          refreshPinIcons();
+          renderDrawerList(true);
+        })
+        .withFailureHandler(() => { /* 色分けが古いままになるだけなので、静かに無視する */ })
+        .getMansionSummary(userAuthPassword);
+    }
+
+    let summaryTimer = null;
+    function scheduleSummaryRefresh() {
+      clearTimeout(summaryTimer);
+      summaryTimer = setTimeout(loadVisitSummary, 2500);
+    }
+
+    // ----- ピンの形 -----
+    function getPinTier() {
+      const z = map ? map.getZoom() : 14;
+      return z <= 14 ? 'dot' : (z <= 16 ? 'pin' : 'full');
+    }
+
     function buildPinIcon(m) {
-      const color = getSheetColor(m.sheetName);
+      const color = pinColorFor(m);
       const isUrgent = isUrgentMansion(m);
       const hasNote = !!m.note;
+      const tier = getPinTier();
+      pinTier = tier;
 
-      const urgentBadge = isUrgent ? `
-        <div style="position: absolute; top: -5px; right: -5px; background: linear-gradient(135deg, #f59e0b, #dc2626); color: #ffffff; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 10;">
-          <i class="fas fa-fire"></i>
-        </div>` : '';
+      if (tier === 'dot') {
+        const sz = 16;
+        return L.divIcon({
+          className: 'mansion-pin-icon',
+          html: `<div class="kpin"><div class="kpin-dot${isUrgent ? ' kpin-glow' : ''}" style="width:${sz}px;height:${sz}px;background:${color.bg};"></div></div>`,
+          iconSize: [sz, sz],
+          iconAnchor: [sz / 2, sz / 2]
+        });
+      }
 
-      const noteBadge = hasNote ? `
-        <div style="position: absolute; top: -5px; left: -7px; background: #dc2626; color: #ffffff; border-radius: 50%; width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; border: 2px solid #ffffff; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 10;">!</div>` : '';
+      const full = tier === 'full';
+      const outer = full ? 38 : 28;          // 輪を含む大きさ
+      const ringW = full ? 4 : 3;            // 輪の太さ
+      const core = outer - ringW * 2;
+      const tail = 8;
 
-      const urgentPulseHtml = isUrgent ? `<div class="urgent-pin-pulse"></div>` : '';
+      // 輪：記録済みの部屋のうち、会（緑）と留（橙）の割合
+      const sm = summaryOf(m);
+      let ringBg = '#ffffff';
+      if (sm) {
+        const tot = (sm.a || 0) + (sm.b || 0) + (sm.o || 0);
+        if (tot > 0) {
+          const aDeg = Math.round((sm.a || 0) / tot * 360);
+          const bDeg = Math.round((sm.b || 0) / tot * 360);
+          ringBg = `conic-gradient(#16a34a 0deg ${aDeg}deg, #f59e0b ${aDeg}deg ${aDeg + bDeg}deg, #cbd5e1 ${aDeg + bDeg}deg 360deg)`;
+        }
+      }
 
-      const pinHtml = `
-        <div class="custom-mansion-pin" style="position: relative; display: flex; align-items: center; justify-content: center;">
-          ${urgentPulseHtml}
-          <div style="background-color: ${color.bg}; color: ${color.text}; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 2px solid #ffffff; position: relative; z-index: 1;">
-            <i class="fas fa-building" style="transform: rotate(45deg); font-size: 13px;"></i>
+      const noteBadge = hasNote ? `<div class="kpin-note">!</div>` : '';
+      const pulse = isUrgent ? `<div class="urgent-pin-pulse" style="width:${outer}px;height:${outer}px;left:0;top:0;"></div>` : '';
+      const label = full ? `<div class="kpin-label">${esc(m.name)}</div>` : '';
+
+      const html = `
+        <div class="kpin">
+          ${pulse}
+          <div class="kpin-ring${isUrgent ? ' kpin-glow' : ''}" style="width:${outer}px;height:${outer}px;background:${ringBg};">
+            <div class="kpin-core" style="width:${core}px;height:${core}px;background:${color.bg};color:${color.text};border:2px solid #ffffff;box-sizing:border-box;">
+              <i class="fas fa-building" style="font-size:${full ? 12 : 9}px;"></i>
+            </div>
           </div>
-          ${urgentBadge}${noteBadge}
+          <div class="kpin-tail" style="top:${outer - 2}px;"></div>
+          ${noteBadge}${label}
         </div>`;
 
       return L.divIcon({
         className: 'mansion-pin-icon',
-        html: pinHtml,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32]
+        html: html,
+        iconSize: [outer, outer + tail],
+        iconAnchor: [outer / 2, outer + tail - 1]
       });
+    }
+
+    // 色・ズーム・集計が変わったとき、ピンの見た目だけを作り直す
+    function refreshPinIcons() {
+      if (!map || !markersLayer) return;
+      markersLayer.eachLayer(mk => {
+        const m = findMansion(mk.options.mansionId);
+        if (m) mk.setIcon(buildPinIcon(m));
+      });
+      applyPinSelection();
+    }
+
+    // 選んだマンションのピンを大きくし、ほかは少し薄くする
+    function applyPinSelection() {
+      Object.keys(mansionMarkersMap).forEach(id => {
+        const mk = mansionMarkersMap[id];
+        if (!mk) return;
+        const sel = currentDetailId !== null && currentDetailId !== undefined && String(currentDetailId) === String(id);
+        const dim = currentDetailId !== null && currentDetailId !== undefined && !sel;
+        mk.setOpacity(dim ? 0.5 : 1);
+        mk.setZIndexOffset(sel ? 1000 : 0);
+        const el = mk.getElement && mk.getElement();
+        if (el) el.classList.toggle('kpin-sel', sel);
+      });
+    }
+
+    // スマホ：ヘッダーを隠す／出す（一覧が開いているときは出さない）
+    function setHdrHidden(hide, force) {
+      const el = document.getElementById('appHeader');
+      if (!el) return;
+      if (window.innerWidth >= 640) { el.classList.remove('hdr-hide'); return; }
+      if (!hide && !force && isDrawerOpen) return;
+      el.classList.toggle('hdr-hide', !!hide);
+    }
+
+    function setMobileListBtn(open) {
+      const ic = document.getElementById('mobileListIcon');
+      const lb = document.getElementById('mobileListLabel');
+      if (ic) ic.className = open ? 'fas fa-map text-base' : 'fas fa-list text-base';
+      if (lb) lb.textContent = open ? '地図' : '一覧';
     }
 
     function renderMarkers(shouldFitBounds = false) {
@@ -2847,7 +3093,7 @@
 
       const newMarkers = [];
       filteredList.forEach(m => {
-        const marker = L.marker([m.lat, m.lng], { icon: buildPinIcon(m), mansionUrgent: isUrgentMansion(m) });
+        const marker = L.marker([m.lat, m.lng], { icon: buildPinIcon(m), mansionUrgent: isUrgentMansion(m), mansionId: m.id });
         marker.on('click', () => { if (pinEdit) return; openDetailSheet(m.id); });
         newMarkers.push(marker);
 
@@ -2855,12 +3101,14 @@
         bounds.push([m.lat, m.lng]);
       });
       newMarkers.forEach(mk => markersLayer.addLayer(mk));
+      applyPinSelection();
 
       if (shouldFitBounds && bounds.length > 0) {
         if (bounds.length === 1) {
           map.setView(bounds[0], 16);
         } else {
-          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
+          const mob = window.innerWidth < 640;
+          map.fitBounds(bounds, { paddingTopLeft: [40, mob ? 72 : 40], paddingBottomRight: [40, mob ? 96 : 40], maxZoom: 16 });
         }
       }
     }
@@ -2960,7 +3208,7 @@
             <div class="flex items-center gap-1.5 flex-wrap">
               ${buildAreaBadge(area)}
               <span style="background-color: ${esc(color.badgeBg)}; color: ${esc(color.badgeText)};" class="px-2 py-0.5 rounded-full text-[10px] font-bold">${esc(m.sheetName)}</span>
-              ${urgentCardBadge}${distBadge}
+              ${urgentCardBadge}${visitChip(m)}${distBadge}
             </div>
             ${noteLine}
             <h4 class="font-bold text-slate-900 text-sm mt-0.5 flex items-center gap-1.5"><span>${esc(m.name)}</span></h4>
@@ -2977,6 +3225,18 @@
       }).join('');
 
       if (preserveScroll) container.scrollTop = prevScroll;
+    }
+
+    // 一覧のカードに出す、訪問状況の小さな表示
+    function visitChip(m) {
+      const sm = summaryOf(m);
+      if (!sm) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-800">未訪問</span>';
+      const parts = [];
+      if (sm.a) parts.push('会' + sm.a);
+      if (sm.b) parts.push('留' + sm.b);
+      const last = String(sm.last || '').slice(5, 10);
+      const stay = sm.b > 0;
+      return `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${stay ? 'bg-amber-100 text-amber-900' : 'bg-slate-100 text-slate-600'}">${esc(parts.join(' ') || '記録あり')}${last ? ' ・' + esc(last) : ''}</span>`;
     }
 
     function onDrawerScroll() {
@@ -3033,7 +3293,7 @@
         return;
       }
       const bounds = L.latLngBounds(list.map(m => [m.lat, m.lng]));
-      map.fitBounds(bounds, { paddingTopLeft: [24, 110], paddingBottomRight: [24, 24], maxZoom: 17, animate: true });
+      map.fitBounds(bounds, { paddingTopLeft: [24, 110], paddingBottomRight: [24, window.innerWidth < 640 ? 96 : 24], maxZoom: 17, animate: true });
     }
 
     function onSearchWindowInput() {
@@ -3063,6 +3323,8 @@
       const badge = document.getElementById('searchBadge');
       const active = searchTerms.length > 0;
       if (badge) badge.classList.toggle('hidden', !active);
+      const badgeM = document.getElementById('searchBadgeM');
+      if (badgeM) badgeM.classList.toggle('hidden', !active);
       if (btn) {
         btn.classList.toggle('bg-emerald-50', active);
         btn.classList.toggle('text-[#13685e]', active);
@@ -3084,7 +3346,11 @@
           btnList.innerHTML = `<i class="fas fa-map text-xs"></i><span>地図</span>`;
         }
         renderDrawerList();
+        setHdrHidden(true, true);
+        setMobileListBtn(true);
       } else {
+        setHdrHidden(false, true);
+        setMobileListBtn(false);
         drawer.classList.add("translate-x-full");
         if (btnList) {
           btnList.innerHTML = `<i class="fas fa-list text-xs"></i><span>一覧</span>`;
