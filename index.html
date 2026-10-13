@@ -219,6 +219,10 @@
     .mansion-pin-icon { transition: opacity .2s; }
 
     /* ===== スマホ用：ヘッダー（左にメニュー・中央にロゴ）・下の操作パネル ===== */
+    /* ===== メニュー・各ページ（スマホは全画面で右から出る） ===== */
+    .menu-page-head, .menu-chev, .ic-mob { display: none; }
+    @keyframes pageIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+    @keyframes pageOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
     #mobileBar { display: none; }
     #mobileBar button { -webkit-tap-highlight-color: transparent; }
     #mobileBar button:focus { outline: none; }
@@ -230,12 +234,35 @@
       #appHeader.hdr-hide { transform: translateY(-140%); }
       #appHeader .hdr-row1 { justify-content: center; min-height: 2.5rem; }
       #appHeader #headerControls { position: absolute; left: .5rem; top: 50%; transform: translateY(-50%); }
-      #hamburgerDropdown { right: auto !important; left: .75rem; top: 3.4rem !important; }
       .hdr-desk { display: none !important; }
       .leaflet-control-zoom { display: none !important; }
       .leaflet-bottom { bottom: 8.4rem; }
       #statusToast { bottom: 9.5rem !important; }
       #mobileBar.on { display: flex; flex-direction: column; z-index: 35; }
+      /* メニュー：全画面の一覧 */
+      #hamburgerDropdown { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0; width: auto !important; max-width: none;
+        border: 0; border-radius: 0; box-shadow: none; padding: 0 !important; gap: 0 !important; background: #f4f5f6 !important; overflow-y: auto; z-index: 10001; }
+      #hamburgerDropdown:not(.hidden) { animation: pageIn .28s ease-out; }
+      #hamburgerDropdown.page-out { animation: pageOut .25s ease-in forwards; pointer-events: none; }
+      #hamburgerDropdown > button { background: #fff; border-radius: 0 !important; border-bottom: 1px solid #eceef0; padding: 1.15rem 1.25rem !important; font-size: 1rem !important; gap: .85rem !important; }
+      #hamburgerDropdown > button > i:first-child { width: 1.4rem !important; font-size: 1.05rem; text-align: center; }
+      #hamburgerDropdown .menu-chev { display: inline-block; margin-left: auto; font-size: .8rem; color: #9aa3ad; }
+      #hamburgerDropdown > .h-px { height: 1rem; margin: 0 !important; background: #f4f5f6; }
+      .menu-page-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; background: #fff; border-bottom: 1px solid #eceef0;
+        padding: calc(.9rem + env(safe-area-inset-top)) 1.1rem .9rem; position: sticky; top: 0; z-index: 5; }
+      /* 各ページ：全画面・右から出る・右上に戻る(〈) */
+      .page-modal { background: #fff !important; backdrop-filter: none !important; padding: 0 !important; align-items: stretch !important; justify-content: stretch !important; }
+      .page-modal:not(.hidden) { animation: pageIn .28s ease-out; }
+      .page-modal.page-out { animation: pageOut .25s ease-in forwards; pointer-events: none; }
+      .page-modal > div { max-width: none !important; width: 100%; height: 100%; max-height: none !important; border-radius: 0 !important; border: 0 !important; box-shadow: none !important;
+        padding: 0 !important; overflow-y: auto; display: flex; flex-direction: column; }
+      .page-modal > div > div:first-child { padding: calc(.9rem + env(safe-area-inset-top)) 1.1rem .9rem !important; margin: 0 !important; border-bottom: 1px solid #eceef0;
+        position: sticky; top: 0; background: #fff; z-index: 5; flex-shrink: 0; }
+      .page-modal .ic-desk { display: none; }
+      .page-modal .ic-mob { display: inline; }
+      #settingsSheet > div { padding-bottom: 2rem !important; }
+      #settingsSheet > div > :not(:first-child), #statsModal > div > :not(:first-child), #adminCheckModal > div > :not(:first-child) { margin-left: 1.1rem; margin-right: 1.1rem; }
+      #statsModal > div > :not(:first-child), #adminCheckModal > div > :not(:first-child) { max-width: none; }
       /* 一覧：下から出るシート（半分／全画面の2段階。つまみを上下にドラッグして切り替え） */
       #listDrawer { left: 0; right: 0; width: auto; height: auto; top: var(--sheet-top, 46%); bottom: 0;
         border-left: 0; border-radius: 1.5rem 1.5rem 0 0; overflow: hidden;
@@ -344,31 +371,41 @@
     </div>
 
     <!-- ハンバーガーメニュー ドロップダウン -->
-    <div id="hamburgerDropdown" class="hidden absolute right-3 top-16 z-[10000] bg-white text-slate-800 border border-slate-200 rounded-2xl shadow-xl p-1.5 w-44 flex flex-col gap-1 backdrop-blur-md">
+    <div id="hamburgerDropdown" class="page-anim hidden absolute right-3 top-16 z-[10000] bg-white text-slate-800 border border-slate-200 rounded-2xl shadow-xl p-1.5 w-44 flex flex-col gap-1 backdrop-blur-md">
+      <div class="menu-page-head">
+        <span class="font-bold text-lg text-slate-800">メニュー</span>
+        <button type="button" onclick="closeHamburgerMenu()" aria-label="戻る" class="p-2 -mr-2 text-slate-600 rounded-full" style="background:transparent;padding:.5rem;"><i class="fas fa-chevron-left text-lg"></i></button>
+      </div>
       <button onclick="openSettingsSheet()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
         <i class="fas fa-sliders text-slate-500 w-4"></i>
         <span>表示設定</span>
+        <i class="fas fa-chevron-right menu-chev"></i>
       </button>
       <button onclick="openReportModal()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
         <i class="fas fa-pen-to-square text-emerald-600 w-4"></i>
         <span>報告</span>
+        <i class="fas fa-chevron-right menu-chev"></i>
       </button>
       <button onclick="openStats()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
         <i class="fas fa-chart-column text-sky-600 w-4"></i>
         <span>訪問の統計</span>
+        <i class="fas fa-chevron-right menu-chev"></i>
       </button>
       <button onclick="toggleAdminMode()" class="w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
         <i id="adminMenuIcon" class="fas fa-lock text-slate-500 w-4"></i>
         <span id="adminMenuLabel">管理者モード</span>
+        <i class="fas fa-chevron-right menu-chev"></i>
       </button>
       <button id="adminCheckMenuBtn" onclick="openAdminCheck()" class="hidden w-full text-left px-3.5 py-2.5 text-xs text-slate-700 hover:bg-slate-100 hover:text-slate-900 rounded-xl flex items-center gap-2 transition font-semibold">
         <i class="fas fa-clipboard-check text-amber-500 w-4"></i>
         <span>登録内容の確認（管理者）</span>
+        <i class="fas fa-chevron-right menu-chev"></i>
       </button>
       <div class="h-px bg-slate-100 my-0.5"></div>
       <button onclick="logout()" class="w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 rounded-xl flex items-center gap-2 transition font-semibold">
         <i class="fas fa-sign-out-alt text-red-500 w-4"></i>
         <span>ログアウト</span>
+        <i class="fas fa-chevron-right menu-chev"></i>
       </button>
     </div>
 
@@ -618,7 +655,7 @@
   </div>
 
   <!-- 表示設定シート（文字サイズ・地図の種類） -->
-  <div id="settingsSheet" class="hidden fixed inset-0 z-[10002] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeSettingsSheet()">
+  <div id="settingsSheet" class="page-modal page-anim hidden fixed inset-0 z-[10002] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeSettingsSheet()">
     <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 p-5 sm:p-6 pb-7">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2 text-slate-800 font-bold text-lg">
@@ -626,7 +663,7 @@
           <span>表示設定</span>
         </div>
         <button type="button" onclick="closeSettingsSheet()" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition">
-          <i class="fas fa-times text-lg"></i>
+          <i class="fas fa-times text-lg ic-desk"></i><i class="fas fa-chevron-left text-lg ic-mob"></i>
         </button>
       </div>
 
@@ -686,7 +723,7 @@
   </button>
 
   <!-- 登録内容の確認（管理者） -->
-  <div id="adminCheckModal" class="hidden fixed inset-0 z-[10003] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeAdminCheck()">
+  <div id="adminCheckModal" class="page-modal page-anim hidden fixed inset-0 z-[10003] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeAdminCheck()">
     <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 p-5 sm:p-6 pb-7 max-h-[88dvh] flex flex-col">
       <div class="flex items-center justify-between mb-3 shrink-0">
         <div class="flex items-center gap-2 text-slate-800 font-bold text-lg">
@@ -694,7 +731,7 @@
           <span>登録内容の確認</span>
         </div>
         <button type="button" onclick="closeAdminCheck()" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition">
-          <i class="fas fa-times text-lg"></i>
+          <i class="fas fa-times text-lg ic-desk"></i><i class="fas fa-chevron-left text-lg ic-mob"></i>
         </button>
       </div>
       <div id="adminCheckBody" class="flex-1 min-h-0 overflow-y-auto"></div>
@@ -703,7 +740,7 @@
   </div>
 
   <!-- 訪問の統計（曜日・時間帯ごとの 会／留） -->
-  <div id="statsModal" class="hidden fixed inset-0 z-[10003] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeStats()">
+  <div id="statsModal" class="page-modal page-anim hidden fixed inset-0 z-[10003] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeStats()">
     <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 p-5 sm:p-6 pb-7 max-h-[90dvh] flex flex-col">
       <div class="flex items-center justify-between mb-3 shrink-0">
         <div class="flex items-center gap-2 text-slate-800 font-bold text-lg">
@@ -711,7 +748,7 @@
           <span>訪問の統計</span>
         </div>
         <button type="button" onclick="closeStats()" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition">
-          <i class="fas fa-times text-lg"></i>
+          <i class="fas fa-times text-lg ic-desk"></i><i class="fas fa-chevron-left text-lg ic-mob"></i>
         </button>
       </div>
       <div id="statsBody" class="flex-1 min-h-0 overflow-y-auto"></div>
@@ -869,7 +906,7 @@
   </div>
 
   <!-- 報告モーダルダイアログ -->
-  <div id="reportModal" class="hidden fixed inset-0 z-[10002] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+  <div id="reportModal" class="page-modal page-anim hidden fixed inset-0 z-[10002] bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100 max-h-[92dvh] overflow-y-auto">
       <div class="p-5 sm:p-6 pb-2 flex items-center justify-between btn-touch-ui">
         <div class="flex items-center gap-2 text-slate-800 font-bold text-lg sm:text-xl">
@@ -877,7 +914,7 @@
           <span>報告</span>
         </div>
         <button type="button" onclick="closeReportModal()" aria-label="報告モーダルを閉じる" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition">
-          <i class="fas fa-times text-lg"></i>
+          <i class="fas fa-times text-lg ic-desk"></i><i class="fas fa-chevron-left text-lg ic-mob"></i>
         </button>
       </div>
 
@@ -991,7 +1028,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.13-4';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.13-5';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -1218,13 +1255,12 @@
     }
 
     function openSettingsSheet() {
-      closeHamburgerMenu();
+      closeHamburgerMenu(true);
       updateSettingsUI();
-      document.getElementById('settingsSheet').classList.remove('hidden');
+      showPage(document.getElementById('settingsSheet'));
     }
     function closeSettingsSheet() {
-      const el = document.getElementById('settingsSheet');
-      if (el) el.classList.add('hidden');
+      hidePage(document.getElementById('settingsSheet'));
     }
 
     // ============================================================
@@ -2553,20 +2589,40 @@
       if (mbar) mbar.classList.remove('on');
     }
 
-    function toggleHamburgerMenu(e) {
-      if (e) e.stopPropagation();
-      const menu = document.getElementById("hamburgerDropdown");
-      if (menu) menu.classList.toggle("hidden");
+    // ----- ページ（メニュー・各画面）の出し入れ：スマホでは右から出て、右へ戻る -----
+    function showPage(el) {
+      if (!el) return;
+      clearTimeout(el._pt);
+      el.classList.remove('page-out');
+      el.classList.remove('hidden');
     }
-
-    function closeHamburgerMenu() {
-      const menu = document.getElementById("hamburgerDropdown");
-      if (menu && !menu.classList.contains("hidden")) {
-        menu.classList.add("hidden");
+    function hidePage(el) {
+      if (!el || el.classList.contains('hidden')) return;
+      if (window.innerWidth < 640 && el.classList.contains('page-anim')) {
+        el.classList.add('page-out');
+        clearTimeout(el._pt);
+        el._pt = setTimeout(() => { el.classList.add('hidden'); el.classList.remove('page-out'); }, 260);
+      } else {
+        el.classList.add('hidden');
       }
     }
 
+    function toggleHamburgerMenu(e) {
+      if (e) e.stopPropagation();
+      const menu = document.getElementById("hamburgerDropdown");
+      if (!menu) return;
+      if (menu.classList.contains('hidden') || menu.classList.contains('page-out')) showPage(menu);
+      else hidePage(menu);
+    }
+
+    // keepOnMobile：スマホでメニューの各ページを開くときは、メニューを下に残す（戻るとメニューに帰る）
+    function closeHamburgerMenu(keepOnMobile) {
+      if (keepOnMobile === true && window.innerWidth < 640) return;
+      hidePage(document.getElementById("hamburgerDropdown"));
+    }
+
     window.addEventListener('click', (e) => {
+      if (window.innerWidth < 640) return;   // スマホのメニューは全画面なので、外側タップでは閉じない
       const btn = document.getElementById("btnHamburger");
       const dropdown = document.getElementById("hamburgerDropdown");
       if (dropdown && !dropdown.classList.contains("hidden") && btn && !btn.contains(e.target) && !dropdown.contains(e.target)) {
@@ -2578,20 +2634,18 @@
     // 報告
     // ============================================================
     function openReportModal(id) {
-      closeHamburgerMenu();
+      closeHamburgerMenu(true);
       reportTarget = null;
       if (typeof id === 'number') {
         const m = findMansion(id);
         if (m) reportTarget = m;
       }
       updateReportTargetUI();
-      const modal = document.getElementById("reportModal");
-      if (modal) modal.classList.remove("hidden");
+      showPage(document.getElementById("reportModal"));
     }
 
     function closeReportModal() {
-      const modal = document.getElementById("reportModal");
-      if (modal) modal.classList.add("hidden");
+      hidePage(document.getElementById("reportModal"));
     }
 
     function clearReportTarget() {
@@ -3513,15 +3567,13 @@
     let statsError = '';
 
     function openStats() {
-      closeHamburgerMenu();
-      const el = document.getElementById('statsModal');
-      if (el) el.classList.remove('hidden');
+      closeHamburgerMenu(true);
+      showPage(document.getElementById('statsModal'));
       loadStats();
     }
 
     function closeStats() {
-      const el = document.getElementById('statsModal');
-      if (el) el.classList.add('hidden');
+      hidePage(document.getElementById('statsModal'));
     }
 
     function loadStats() {
@@ -3842,16 +3894,15 @@
     let adminCheckState = null;
 
     function openAdminCheck() {
-      closeHamburgerMenu();
+      closeHamburgerMenu(true);
       if (!isAdminOn()) return;
-      document.getElementById('adminCheckModal').classList.remove('hidden');
+      showPage(document.getElementById('adminCheckModal'));
       startAdminCheck(false);
     }
 
     function closeAdminCheck() {
       adminCheckRun++;   // 実行中の確認を止める
-      const el = document.getElementById('adminCheckModal');
-      if (el) el.classList.add('hidden');
+      hidePage(document.getElementById('adminCheckModal'));
     }
 
     // withRooms が true のときは、部屋番号シートも順番に開いて確認する（数分かかる）
