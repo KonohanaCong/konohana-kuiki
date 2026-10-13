@@ -236,8 +236,8 @@
       #appHeader #headerControls { position: absolute; left: .5rem; top: 50%; transform: translateY(-50%); }
       .hdr-desk { display: none !important; }
       .leaflet-control-zoom { display: none !important; }
-      .leaflet-bottom { bottom: 8.4rem; }
-      #statusToast { bottom: 9.5rem !important; }
+      .leaflet-bottom { bottom: 5.2rem; }
+      #statusToast { bottom: 6.2rem !important; }
       #mobileBar.on { display: flex; flex-direction: column; z-index: 35; }
       /* メニュー：全画面の一覧 */
       #hamburgerDropdown { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0; width: auto !important; max-width: none;
@@ -271,9 +271,9 @@
       #listDrawer:not(.translate-x-full) { transform: none; }
       #listDrawer.sheet-dragging { transition: none; }
       #listDrawer .sheet-head { touch-action: none; }
-      #drawerContent { padding-bottom: 9rem; }
-      #btnDrawerTop { bottom: 9rem !important; }
-      #mobileBar #headerAreaFilter { padding: .1rem .15rem 0; }
+      #drawerContent { padding-bottom: 6rem; }
+      #btnDrawerTop { bottom: 6rem !important; }
+      #headerAreaFilter { display: none !important; }
     }
 
     /* 検索窓：ブラウザ標準の「×」は消し、自前の×だけを使う */
@@ -409,8 +409,7 @@
       </button>
     </div>
 
-    <!-- 2行目：エリアフィルター ＆ 絞込（スマホでは下の操作パネルへ移ります） -->
-    <span id="areaFilterHome" class="hidden"></span>
+    <!-- 2行目：エリアフィルター ＆ 絞込（スマホでは、絞込シートに移っています） -->
     <div id="headerAreaFilter" class="hidden items-center justify-between gap-1 w-full pt-0.5 relative">
       <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 min-w-0 pb-0.5">
         <button onclick="setAreaFilter('ALL')" id="header-tab-ALL" class="header-filter-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all text-white bg-[#1e293b] shadow-sm whitespace-nowrap text-center shrink-0">
@@ -553,22 +552,22 @@
 
 
     <!-- スマホ用：下の操作バー -->
-    <div id="mobileBar" class="absolute left-2 right-2 bottom-3 z-20 bg-white/95 backdrop-blur rounded-3xl shadow-xl border border-slate-200 px-1 pt-1.5 pb-1 btn-touch-ui">
-      <!-- エリアのボタン・絞込（スマホではここに移ります） -->
-      <div id="mobileChips" class="px-1"></div>
-      <div class="flex items-stretch gap-0.5 mt-0.5">
-        <button type="button" id="dock-home" onclick="goHome()" aria-label="ホーム" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+    <div id="mobileBar" class="absolute left-2 right-2 bottom-3 z-20 bg-white/95 backdrop-blur rounded-3xl shadow-xl border border-slate-200 px-1 py-1 btn-touch-ui">
+      <div class="flex items-stretch gap-0.5">
+        <button type="button" id="dock-home" onclick="dockHome()" aria-label="ホーム" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
           <i class="fas fa-house text-base"></i><span class="text-[10px] font-bold mt-0.5">ホーム</span>
         </button>
-        <button type="button" id="dock-search" onclick="openSearchScreen()" aria-label="検索" class="relative flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <button type="button" onclick="toggleMansionListDrawer()" id="mobileListBtn" aria-label="一覧" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+          <i class="fas fa-list text-base" id="mobileListIcon"></i><span class="text-[10px] font-bold mt-0.5" id="mobileListLabel">一覧</span>
+        </button>
+        <button type="button" id="dock-search" onclick="dockSearch()" aria-label="検索" class="relative flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
           <i class="fas fa-search text-base"></i><span class="text-[10px] font-bold mt-0.5">検索</span>
-          <span id="searchBadgeM" class="hidden absolute top-1 right-[28%] w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
         </button>
         <button type="button" id="dock-loc" onclick="moveToCurrentLocation()" aria-label="現在地" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
           <i class="fas fa-crosshairs text-base"></i><span class="text-[10px] font-bold mt-0.5">現在地</span>
         </button>
-        <button type="button" onclick="toggleMansionListDrawer()" id="mobileListBtn" aria-label="一覧" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
-          <i class="fas fa-list text-base" id="mobileListIcon"></i><span class="text-[10px] font-bold mt-0.5" id="mobileListLabel">一覧</span>
+        <button type="button" id="dock-filter" onclick="dockFilter()" aria-label="絞込" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+          <i class="fas fa-sliders text-base"></i><span class="text-[10px] font-bold mt-0.5">絞込</span>
         </button>
       </div>
     </div>
@@ -644,6 +643,9 @@
           <i class="fas fa-times text-lg"></i>
         </button>
       </div>
+
+      <div class="text-[11px] font-bold text-slate-500 mb-1.5 shrink-0">エリア</div>
+      <div id="filterAreaList" class="grid grid-cols-2 gap-1.5 mb-4 shrink-0"></div>
 
       <div class="text-[11px] font-bold text-slate-500 mb-1.5 shrink-0">区域（丸の色がピンの色です）</div>
       <div id="filterSheetList" class="flex-1 min-h-0 overflow-y-auto space-y-1.5 mb-3"></div>
@@ -1028,7 +1030,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.13-5';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.13-6';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -2225,17 +2227,43 @@
       closeHamburgerMenu();
       renderFilterSheet();
       document.getElementById('filterSheet').classList.remove('hidden');
+      updateDock();
     }
     function closeFilterSheet() {
       const el = document.getElementById('filterSheet');
       if (el) el.classList.add('hidden');
+      updateDock();
     }
     function renderFilterSheetIfOpen() {
       const el = document.getElementById('filterSheet');
       if (el && !el.classList.contains('hidden')) renderFilterSheet();
     }
 
+    function renderFilterAreaList() {
+      const box = document.getElementById('filterAreaList');
+      if (!box) return;
+      const cnt = {
+        'ALL': mansionDataList.length,
+        '此花区': mansionDataList.filter(m => getMansionArea(m) === '此花区').length,
+        '福島区': mansionDataList.filter(m => getMansionArea(m) === '福島区').length,
+        '急ぎ・優先': mansionDataList.filter(m => isUrgentMansion(m)).length
+      };
+      const items = [['ALL', 'すべて', ''], ['此花区', '此花区', '#93c5fd'], ['福島区', '福島区', '#6ee7b7'], ['急ぎ・優先', '急ぎ・優先', '']];
+      box.innerHTML = items.map(it => {
+        const active = currentAreaFilter === it[0];
+        const dot = it[0] === '急ぎ・優先'
+          ? '<i class="fas fa-fire text-amber-600 text-xs"></i>'
+          : (it[2] ? `<span class="w-3 h-3 rounded-full shrink-0" style="background-color:${it[2]};"></span>` : '');
+        return `<button type="button" onclick="setAreaFilter('${it[0]}')" class="flex items-center gap-2 px-3 py-2.5 rounded-2xl border text-left transition ${active ? 'border-[#13685e] bg-emerald-50' : 'border-slate-200 bg-white hover:bg-slate-50'}">
+          ${dot}<span class="flex-1 text-sm font-bold text-slate-800 truncate">${esc(it[1])}</span>
+          <span class="text-xs text-slate-500">${cnt[it[0]]}</span>
+          ${active ? '<i class="fas fa-check text-[#13685e] text-xs"></i>' : ''}
+        </button>`;
+      }).join('');
+    }
+
     function renderFilterSheet() {
+      renderFilterAreaList();
       const stats = getSheetStats();
       const totalAll = mansionDataList.length;
 
@@ -2279,11 +2307,14 @@
 
     function resetFilters() {
       currentSheetFilter = '';
+      currentAreaFilter = 'ALL';
+      updateFilterUI();
       onFiltersChanged();
     }
 
     function onFiltersChanged() {
       updateFilterChip();
+      updateDock();
       renderFilterSheetIfOpen();
       renderMarkers(true);
       renderDrawerList();
@@ -2909,6 +2940,7 @@
     function setAreaFilter(area) {
       currentAreaFilter = area;
       updateFilterUI();
+      renderFilterSheetIfOpen();
       renderMarkers(true);
       renderDrawerList();
     }
@@ -2919,6 +2951,7 @@
     };
 
     function updateFilterUI() {
+      setTimeout(updateDock, 0);
       const filters = ['ALL', '此花区', '福島区', '急ぎ・優先'];
       filters.forEach(f => {
         const btn = document.getElementById(`header-tab-${f}`);
@@ -3026,21 +3059,6 @@
       });
     }
 
-    // スマホでは、エリアのボタン・絞込を下の操作パネルへ移す（パソコンではヘッダーのまま）
-    function placeFilterRow() {
-      const row = document.getElementById('headerAreaFilter');
-      const home = document.getElementById('areaFilterHome');
-      const dock = document.getElementById('mobileChips');
-      if (!row || !home || !dock) return;
-      const mobile = window.innerWidth < 640;
-      if (mobile && row.parentNode !== dock) dock.appendChild(row);
-      else if (!mobile && row.parentNode === dock) home.parentNode.insertBefore(row, home.nextSibling);
-    }
-    (function () {
-      const run = () => { placeFilterRow(); window.addEventListener('resize', placeFilterRow); };
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
-    })();
-
     // 「ホーム」：絞り込み・検索をすべて解除して、全マンションが見える最初の表示に戻す
     function goHome(noHighlight) {
       closeHamburgerMenu();
@@ -3068,19 +3086,24 @@
       updateDock();
     }
 
-    // 下の操作パネル：タップしたボタンだけ緑にする（最初はどれも緑ではない）
+    // 下の操作パネル：使っている機能のボタンだけ緑にする。もう一度押すと解除する
     let dockActive = null;   // 'home' / 'search' / 'loc' / null
     function setDockActive(name) { dockActive = name; updateDock(); }
+    function filtersActive() { return currentAreaFilter !== 'ALL' || !!currentSheetFilter; }
+
     function updateDock() {
       const on = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center text-white bg-[#13685e] active:bg-[#0a3f39]';
       const off = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100';
       const win = document.getElementById('searchWindow');
       const searchOpen = !!(win && !win.classList.contains('hidden'));
+      const fs = document.getElementById('filterSheet');
+      const filterOpen = !!(fs && !fs.classList.contains('hidden'));
       const state = {
         'dock-home': dockActive === 'home',
-        'dock-search': searchOpen || dockActive === 'search' || (typeof searchTerms !== 'undefined' && searchTerms.length > 0),
+        'mobileListBtn': !!isDrawerOpen,
+        'dock-search': searchOpen || searchTerms.length > 0,
         'dock-loc': dockActive === 'loc',
-        'mobileListBtn': !!isDrawerOpen
+        'dock-filter': filterOpen || filtersActive()
       };
       Object.keys(state).forEach(id => {
         const el = document.getElementById(id);
@@ -3088,6 +3111,34 @@
         el.className = (state[id] ? on : off) + (id === 'dock-search' ? ' relative' : '');
         el.setAttribute('aria-pressed', state[id] ? 'true' : 'false');
       });
+    }
+
+    // ホーム：もう一度押すと、緑だけ解除する
+    function dockHome() {
+      if (dockActive === 'home') { setDockActive(null); return; }
+      goHome();
+    }
+
+    // 検索：検索中なら、検索を解除する。そうでなければ検索の窓を開く
+    function dockSearch() {
+      const win = document.getElementById('searchWindow');
+      const open = !!(win && !win.classList.contains('hidden'));
+      if (!open && searchTerms.length > 0) {
+        ['mansionSearchInput', 'searchWindowInput'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        pendingSearchFit = false;
+        handleSearchInput();
+        updateDock();
+        return;
+      }
+      openSearchScreen();
+    }
+
+    // 絞込：絞り込み中なら、絞り込みを解除する。そうでなければ絞込シートを開く
+    function dockFilter() {
+      const fs = document.getElementById('filterSheet');
+      const open = !!(fs && !fs.classList.contains('hidden'));
+      if (!open && filtersActive()) { resetFilters(); updateDock(); return; }
+      openFilterSheet();
     }
 
     // ----- 一覧（スマホ：下から出るシート） -----
@@ -3193,7 +3244,7 @@
           map.setView(bounds[0], 16);
         } else {
           const mob = window.innerWidth < 640;
-          map.fitBounds(bounds, { paddingTopLeft: [40, mob ? 70 : 40], paddingBottomRight: [40, mob ? 150 : 40], maxZoom: 16 });
+          map.fitBounds(bounds, { paddingTopLeft: [40, mob ? 70 : 40], paddingBottomRight: [40, mob ? 100 : 40], maxZoom: 16 });
         }
       }
     }
@@ -3347,6 +3398,7 @@
       document.getElementById('searchWindow').classList.remove('hidden');
       updateSearchWindowClear();
       setTimeout(() => { inp.focus(); inp.select(); }, 50);
+      updateDock();
     }
 
     function closeSearchWindow() {
@@ -3370,7 +3422,7 @@
         return;
       }
       const bounds = L.latLngBounds(list.map(m => [m.lat, m.lng]));
-      map.fitBounds(bounds, { paddingTopLeft: [24, 110], paddingBottomRight: [24, window.innerWidth < 640 ? 150 : 24], maxZoom: 17, animate: true });
+      map.fitBounds(bounds, { paddingTopLeft: [24, 110], paddingBottomRight: [24, window.innerWidth < 640 ? 100 : 24], maxZoom: 17, animate: true });
     }
 
     function onSearchWindowInput() {
