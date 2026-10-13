@@ -220,7 +220,9 @@
 
     /* ===== スマホ用：ヘッダー（左にメニュー・中央にロゴ）・下の操作パネル ===== */
     #mobileBar { display: none; }
+    .sheet-grip { display: none; }
     @media (max-width: 639px) {
+      .sheet-grip { display: block; }
       #appHeader { position: absolute; top: 0; left: 0; right: 0; transition: transform .28s ease; }
       body.admin-on #appHeader { top: 1.5rem; }
       #appHeader.hdr-hide { transform: translateY(-140%); }
@@ -231,7 +233,17 @@
       .leaflet-control-zoom { display: none !important; }
       .leaflet-bottom { bottom: 8.4rem; }
       #statusToast { bottom: 9.5rem !important; }
-      #mobileBar.on { display: flex; flex-direction: column; }
+      #mobileBar.on { display: flex; flex-direction: column; z-index: 35; }
+      /* 一覧：下から出るシート（半分／全画面の2段階。つまみを上下にドラッグして切り替え） */
+      #listDrawer { left: 0; right: 0; width: auto; height: auto; top: var(--sheet-top, 46%); bottom: 0;
+        border-left: 0; border-radius: 1.5rem 1.5rem 0 0; overflow: hidden;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.28); transition: transform .3s ease, top .25s ease; }
+      #listDrawer.translate-x-full { transform: translateY(110%); }
+      #listDrawer:not(.translate-x-full) { transform: none; }
+      #listDrawer.sheet-dragging { transition: none; }
+      #listDrawer .sheet-head { touch-action: none; }
+      #drawerContent { padding-bottom: 9rem; }
+      #btnDrawerTop { bottom: 9rem !important; }
       #mobileBar #headerAreaFilter { padding: .1rem .15rem 0; }
     }
 
@@ -506,14 +518,14 @@
       <!-- エリアのボタン・絞込（スマホではここに移ります） -->
       <div id="mobileChips" class="px-1"></div>
       <div class="flex items-stretch gap-0.5 mt-0.5">
-        <button type="button" onclick="goHome()" aria-label="ホーム" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <button type="button" id="dock-home" onclick="goHome()" aria-label="ホーム" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
           <i class="fas fa-house text-base"></i><span class="text-[10px] font-bold mt-0.5">ホーム</span>
         </button>
-        <button type="button" onclick="openSearchScreen()" aria-label="検索" class="relative flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <button type="button" id="dock-search" onclick="openSearchScreen()" aria-label="検索" class="relative flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
           <i class="fas fa-search text-base"></i><span class="text-[10px] font-bold mt-0.5">検索</span>
           <span id="searchBadgeM" class="hidden absolute top-1 right-[28%] w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
         </button>
-        <button type="button" onclick="moveToCurrentLocation()" aria-label="現在地" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-white bg-[#13685e] active:bg-[#0a3f39]">
+        <button type="button" id="dock-loc" onclick="moveToCurrentLocation()" aria-label="現在地" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
           <i class="fas fa-crosshairs text-base"></i><span class="text-[10px] font-bold mt-0.5">現在地</span>
         </button>
         <button type="button" onclick="toggleMansionListDrawer()" id="mobileListBtn" aria-label="一覧" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
@@ -524,7 +536,8 @@
 
     <!-- マンション一覧ドロワー -->
     <div id="listDrawer" class="absolute top-0 right-0 h-full w-full sm:w-80 bg-white/95 backdrop-blur-md shadow-2xl z-30 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-l border-slate-200">
-      <div class="px-3 pt-3 pb-2.5 bg-[#13685e] text-white flex flex-col gap-2.5 shrink-0 btn-touch-ui">
+      <div class="sheet-head px-3 pt-3 pb-2.5 bg-[#13685e] text-white flex flex-col gap-2.5 shrink-0 btn-touch-ui">
+        <div class="sheet-grip -mt-1 mx-auto w-11 h-1.5 rounded-full bg-white/50"></div>
         <div class="flex items-center justify-between">
           <h3 class="font-bold text-sm flex items-center gap-2">
             <i class="fas fa-building text-white"></i>
@@ -976,7 +989,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.13-1';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.13-3';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -1384,6 +1397,7 @@
       const m = findMansion(id);
       if (!m) return;
       currentDetailId = id;
+      if (window.innerWidth < 640 && isDrawerOpen) toggleMansionListDrawer();
       closeHamburgerMenu();
       renderDetailSheet();
       const sheet = document.getElementById('detailSheet');
@@ -2443,6 +2457,8 @@
       }
       const mbar = document.getElementById('mobileBar');
       if (mbar) mbar.classList.add('on');
+      dockActive = null;
+      updateDock();
 
       resetSessionState();
 
@@ -2676,7 +2692,7 @@
       markersLayer = createMarkersLayer().addTo(map);
 
       map.on('click', () => { closeDetailSheet(); setHdrHidden(false); });
-      map.on('dragstart', () => { clearTimeout(hdrTimer); if (!isDrawerOpen) setHdrHidden(true); });
+      map.on('dragstart', () => { if (dockActive === 'home' || dockActive === 'loc') setDockActive(null); clearTimeout(hdrTimer); if (!isDrawerOpen) setHdrHidden(true); });
       map.on('dragend', () => { clearTimeout(hdrTimer); hdrTimer = setTimeout(() => setHdrHidden(false), 1800); });
       map.on('zoomend', () => { if (getPinTier() !== pinTier) refreshPinIcons(); });
     }
@@ -2972,6 +2988,7 @@
     // 「ホーム」：絞り込み・検索をすべて解除して、全マンションが見える最初の表示に戻す
     function goHome() {
       closeHamburgerMenu();
+      dockActive = 'home';
       currentAreaFilter = 'ALL';
       currentSheetFilter = '';
       searchTerms = [];
@@ -2992,7 +3009,91 @@
       setHdrHidden(false, true);
       renderMarkers(true);
       renderDrawerList();
+      updateDock();
     }
+
+    // 下の操作パネル：タップしたボタンだけ緑にする（最初はどれも緑ではない）
+    let dockActive = null;   // 'home' / 'search' / 'loc' / null
+    function setDockActive(name) { dockActive = name; updateDock(); }
+    function updateDock() {
+      const on = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center text-white bg-[#13685e] active:bg-[#0a3f39]';
+      const off = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100';
+      const win = document.getElementById('searchWindow');
+      const searchOpen = !!(win && !win.classList.contains('hidden'));
+      const state = {
+        'dock-home': dockActive === 'home',
+        'dock-search': searchOpen || dockActive === 'search' || (typeof searchTerms !== 'undefined' && searchTerms.length > 0),
+        'dock-loc': dockActive === 'loc',
+        'mobileListBtn': !!isDrawerOpen
+      };
+      Object.keys(state).forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = (state[id] ? on : off) + (id === 'dock-search' ? ' relative' : '');
+        el.setAttribute('aria-pressed', state[id] ? 'true' : 'false');
+      });
+    }
+
+    // ----- 一覧（スマホ：下から出るシート） -----
+    const SHEET_HALF = '46%';
+    const SHEET_FULL = '0.5rem';
+    let sheetState = 'half';
+
+    function setSheetState(state) {
+      const d = document.getElementById('listDrawer');
+      if (!d) return;
+      sheetState = state;
+      d.style.top = '';
+      d.style.setProperty('--sheet-top', state === 'full' ? SHEET_FULL : SHEET_HALF);
+    }
+
+    (function setupSheetDrag() {
+      const run = () => {
+        const d = document.getElementById('listDrawer');
+        const head = d && d.querySelector('.sheet-head');
+        if (!head) return;
+        let startY = 0, startTop = 0, lastY = 0, lastT = 0, vel = 0, moved = false, active = false;
+
+        head.addEventListener('pointerdown', (e) => {
+          if (window.innerWidth >= 640) return;
+          if (e.target.closest('input, button')) return;   // 検索欄やボタンの操作はそのまま
+          active = true; moved = false;
+          startY = lastY = e.clientY; lastT = e.timeStamp; vel = 0;
+          startTop = d.offsetTop;
+          try { head.setPointerCapture(e.pointerId); } catch (err) { /* 何もしない */ }
+        });
+        head.addEventListener('pointermove', (e) => {
+          if (!active) return;
+          const dy = e.clientY - startY;
+          if (Math.abs(dy) > 4) moved = true;
+          if (!moved) return;
+          d.classList.add('sheet-dragging');
+          const dt = Math.max(e.timeStamp - lastT, 1);
+          vel = (e.clientY - lastY) / dt;   // px/ms（下向きが＋）
+          lastY = e.clientY; lastT = e.timeStamp;
+          const mainH = d.parentNode.clientHeight;
+          d.style.top = Math.min(Math.max(startTop + dy, 8), mainH) + 'px';
+        });
+        const end = (e) => {
+          if (!active) return;
+          active = false;
+          d.classList.remove('sheet-dragging');
+          if (!moved) {   // タップ：半分⇔全画面
+            setSheetState(sheetState === 'half' ? 'full' : 'half');
+            return;
+          }
+          const mainH = d.parentNode.clientHeight;
+          const top = d.offsetTop;
+          if (top > mainH * 0.78 || vel > 0.9 && sheetState === 'half') { d.style.top = ''; toggleMansionListDrawer(); return; }
+          if (vel < -0.5) setSheetState('full');
+          else if (vel > 0.5) setSheetState('half');
+          else setSheetState(top < mainH * 0.28 ? 'full' : 'half');
+        };
+        head.addEventListener('pointerup', end);
+        head.addEventListener('pointercancel', end);
+      };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+    })();
 
     // スマホ：ヘッダーを隠す／出す（一覧が開いているときは出さない）
     function setHdrHidden(hide, force) {
@@ -3181,6 +3282,8 @@
     // 検索ボタン：検索の窓だけを開く（入力すると地図のピン・一覧が絞り込まれる）
     function openSearchScreen() {
       closeHamburgerMenu();
+      dockActive = 'search';
+      updateDock();
       const main = document.getElementById('mansionSearchInput');
       const inp = document.getElementById('searchWindowInput');
       if (!inp) return;
@@ -3195,6 +3298,8 @@
       if (el) el.classList.add('hidden');
       const inp = document.getElementById('searchWindowInput');
       if (inp) inp.blur();
+      if (dockActive === 'search') dockActive = null;
+      updateDock();
     }
 
     // 検索窓から検索したとき、該当したマンションのピンの付近へ地図を移動・拡大する
@@ -3239,6 +3344,7 @@
       const badge = document.getElementById('searchBadge');
       const active = searchTerms.length > 0;
       if (badge) badge.classList.toggle('hidden', !active);
+      updateDock();
       const badgeM = document.getElementById('searchBadgeM');
       if (badgeM) badgeM.classList.toggle('hidden', !active);
       if (btn) {
@@ -3257,6 +3363,7 @@
 
       if (isDrawerOpen) {
         closeDetailSheet();
+        setSheetState('half');
         drawer.classList.remove("translate-x-full");
         if (btnList) {
           btnList.innerHTML = `<i class="fas fa-map text-xs"></i><span>地図</span>`;
@@ -3264,9 +3371,11 @@
         renderDrawerList();
         setHdrHidden(true, true);
         setMobileListBtn(true);
+        updateDock();
       } else {
         setHdrHidden(false, true);
         setMobileListBtn(false);
+        updateDock();
         drawer.classList.add("translate-x-full");
         if (btnList) {
           btnList.innerHTML = `<i class="fas fa-list text-xs"></i><span>一覧</span>`;
@@ -3324,6 +3433,7 @@
     function moveToCurrentLocation() {
       if (userCoordinates && map) {
         map.setView(userCoordinates, CURRENT_LOCATION_ZOOM);
+        setDockActive('loc');
         if (userMarker) userMarker.openPopup();
         showToast("現在地に移動しました", false);
       } else {
