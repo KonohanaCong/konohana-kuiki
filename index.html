@@ -220,6 +220,8 @@
 
     /* ===== スマホ用：ヘッダー（左にメニュー・中央にロゴ）・下の操作パネル ===== */
     #mobileBar { display: none; }
+    #mobileBar button { -webkit-tap-highlight-color: transparent; }
+    #mobileBar button:focus { outline: none; }
     .sheet-grip { display: none; }
     @media (max-width: 639px) {
       .sheet-grip { display: block; }
@@ -989,7 +991,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.13-3';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.13-4';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -2986,9 +2988,9 @@
     })();
 
     // 「ホーム」：絞り込み・検索をすべて解除して、全マンションが見える最初の表示に戻す
-    function goHome() {
+    function goHome(noHighlight) {
       closeHamburgerMenu();
-      dockActive = 'home';
+      dockActive = noHighlight === true ? null : 'home';
       currentAreaFilter = 'ALL';
       currentSheetFilter = '';
       searchTerms = [];
@@ -3431,6 +3433,8 @@
     }
 
     function moveToCurrentLocation() {
+      // 緑の状態でもう一度押したら、緑を解除してホームの表示に戻る
+      if (dockActive === 'loc') { goHome(true); return; }
       if (userCoordinates && map) {
         map.setView(userCoordinates, CURRENT_LOCATION_ZOOM);
         setDockActive('loc');
