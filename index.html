@@ -218,16 +218,21 @@
     .kpin-sel .kpin { transform: scale(1.3); transform-origin: 50% 100%; transition: transform .15s; }
     .mansion-pin-icon { transition: opacity .2s; }
 
-    /* ===== スマホ用：ヘッダー（2段のまま・地図を動かすと隠れる）・下の操作バー ===== */
+    /* ===== スマホ用：ヘッダー（左にメニュー・中央にロゴ）・下の操作パネル ===== */
     #mobileBar { display: none; }
     @media (max-width: 639px) {
       #appHeader { position: absolute; top: 0; left: 0; right: 0; transition: transform .28s ease; }
       body.admin-on #appHeader { top: 1.5rem; }
       #appHeader.hdr-hide { transform: translateY(-140%); }
+      #appHeader .hdr-row1 { justify-content: center; min-height: 2.5rem; }
+      #appHeader #headerControls { position: absolute; left: .5rem; top: 50%; transform: translateY(-50%); }
+      #hamburgerDropdown { right: auto !important; left: .75rem; top: 3.4rem !important; }
       .hdr-desk { display: none !important; }
       .leaflet-control-zoom { display: none !important; }
-      #statusToast { bottom: 6rem !important; }
-      #mobileBar.on { display: flex; }
+      .leaflet-bottom { bottom: 8.4rem; }
+      #statusToast { bottom: 9.5rem !important; }
+      #mobileBar.on { display: flex; flex-direction: column; }
+      #mobileBar #headerAreaFilter { padding: .1rem .15rem 0; }
     }
 
     /* 検索窓：ブラウザ標準の「×」は消し、自前の×だけを使う */
@@ -291,7 +296,7 @@
 
   <!-- 上部ヘッダー -->
   <header id="appHeader" class="bg-white text-slate-800 px-3.5 sm:px-4 pt-2.5 pb-2 flex flex-col gap-2 shadow-sm z-[9999] shrink-0 relative border-b border-slate-100 btn-touch-ui">
-    <div class="flex items-center justify-between w-full gap-2">
+    <div class="hdr-row1 flex items-center justify-between w-full gap-2">
       <div class="flex items-center gap-2 shrink-0">
         <!-- ヘッダーアイコン (SVG) -->
         <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm shrink-0 overflow-hidden border border-slate-200">
@@ -353,7 +358,8 @@
       </button>
     </div>
 
-    <!-- 2行目：エリアフィルター ＆ 絞込 -->
+    <!-- 2行目：エリアフィルター ＆ 絞込（スマホでは下の操作パネルへ移ります） -->
+    <span id="areaFilterHome" class="hidden"></span>
     <div id="headerAreaFilter" class="hidden items-center justify-between gap-1 w-full pt-0.5 relative">
       <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 min-w-0 pb-0.5">
         <button onclick="setAreaFilter('ALL')" id="header-tab-ALL" class="header-filter-btn px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-all text-white bg-[#1e293b] shadow-sm whitespace-nowrap text-center shrink-0">
@@ -496,17 +502,24 @@
 
 
     <!-- スマホ用：下の操作バー -->
-    <div id="mobileBar" class="absolute left-1/2 -translate-x-1/2 bottom-4 z-20 bg-white/95 backdrop-blur rounded-full shadow-xl border border-slate-200 px-1.5 py-1 gap-0.5 items-center btn-touch-ui">
-      <button type="button" onclick="openSearchScreen()" aria-label="検索" class="relative w-[62px] py-1.5 rounded-full flex flex-col items-center text-slate-700 active:bg-slate-100">
-        <i class="fas fa-search text-base"></i><span class="text-[10px] font-bold mt-0.5">検索</span>
-        <span id="searchBadgeM" class="hidden absolute top-1 right-3 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
-      </button>
-      <button type="button" onclick="moveToCurrentLocation()" aria-label="現在地" class="w-[62px] py-1.5 rounded-full flex flex-col items-center text-white bg-[#13685e] active:bg-[#0a3f39]">
-        <i class="fas fa-crosshairs text-base"></i><span class="text-[10px] font-bold mt-0.5">現在地</span>
-      </button>
-      <button type="button" onclick="toggleMansionListDrawer()" id="mobileListBtn" aria-label="一覧" class="w-[62px] py-1.5 rounded-full flex flex-col items-center text-slate-700 active:bg-slate-100">
-        <i class="fas fa-list text-base" id="mobileListIcon"></i><span class="text-[10px] font-bold mt-0.5" id="mobileListLabel">一覧</span>
-      </button>
+    <div id="mobileBar" class="absolute left-2 right-2 bottom-3 z-20 bg-white/95 backdrop-blur rounded-3xl shadow-xl border border-slate-200 px-1 pt-1.5 pb-1 btn-touch-ui">
+      <!-- エリアのボタン・絞込（スマホではここに移ります） -->
+      <div id="mobileChips" class="px-1"></div>
+      <div class="flex items-stretch gap-0.5 mt-0.5">
+        <button type="button" onclick="goHome()" aria-label="ホーム" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+          <i class="fas fa-house text-base"></i><span class="text-[10px] font-bold mt-0.5">ホーム</span>
+        </button>
+        <button type="button" onclick="openSearchScreen()" aria-label="検索" class="relative flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+          <i class="fas fa-search text-base"></i><span class="text-[10px] font-bold mt-0.5">検索</span>
+          <span id="searchBadgeM" class="hidden absolute top-1 right-[28%] w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-white"></span>
+        </button>
+        <button type="button" onclick="moveToCurrentLocation()" aria-label="現在地" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-white bg-[#13685e] active:bg-[#0a3f39]">
+          <i class="fas fa-crosshairs text-base"></i><span class="text-[10px] font-bold mt-0.5">現在地</span>
+        </button>
+        <button type="button" onclick="toggleMansionListDrawer()" id="mobileListBtn" aria-label="一覧" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+          <i class="fas fa-list text-base" id="mobileListIcon"></i><span class="text-[10px] font-bold mt-0.5" id="mobileListLabel">一覧</span>
+        </button>
+      </div>
     </div>
 
     <!-- マンション一覧ドロワー -->
@@ -963,7 +976,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.12-1';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.13-1';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -2941,6 +2954,46 @@
       });
     }
 
+    // スマホでは、エリアのボタン・絞込を下の操作パネルへ移す（パソコンではヘッダーのまま）
+    function placeFilterRow() {
+      const row = document.getElementById('headerAreaFilter');
+      const home = document.getElementById('areaFilterHome');
+      const dock = document.getElementById('mobileChips');
+      if (!row || !home || !dock) return;
+      const mobile = window.innerWidth < 640;
+      if (mobile && row.parentNode !== dock) dock.appendChild(row);
+      else if (!mobile && row.parentNode === dock) home.parentNode.insertBefore(row, home.nextSibling);
+    }
+    (function () {
+      const run = () => { placeFilterRow(); window.addEventListener('resize', placeFilterRow); };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+    })();
+
+    // 「ホーム」：絞り込み・検索をすべて解除して、全マンションが見える最初の表示に戻す
+    function goHome() {
+      closeHamburgerMenu();
+      currentAreaFilter = 'ALL';
+      currentSheetFilter = '';
+      searchTerms = [];
+      sortByDistance = false;
+      pendingSearchFit = false;
+      ['mansionSearchInput', 'searchWindowInput'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      closeDetailSheet();
+      closeFilterSheet();
+      closeSearchWindow();
+      if (isDrawerOpen) toggleMansionListDrawer();
+      updateSortUI();
+      updateFilterUI();
+      updateFilterChip();
+      updateSearchBtn();
+      setHdrHidden(false, true);
+      renderMarkers(true);
+      renderDrawerList();
+    }
+
     // スマホ：ヘッダーを隠す／出す（一覧が開いているときは出さない）
     function setHdrHidden(hide, force) {
       const el = document.getElementById('appHeader');
@@ -2983,7 +3036,7 @@
           map.setView(bounds[0], 16);
         } else {
           const mob = window.innerWidth < 640;
-          map.fitBounds(bounds, { paddingTopLeft: [40, mob ? 108 : 40], paddingBottomRight: [40, mob ? 96 : 40], maxZoom: 16 });
+          map.fitBounds(bounds, { paddingTopLeft: [40, mob ? 70 : 40], paddingBottomRight: [40, mob ? 150 : 40], maxZoom: 16 });
         }
       }
     }
@@ -3156,7 +3209,7 @@
         return;
       }
       const bounds = L.latLngBounds(list.map(m => [m.lat, m.lng]));
-      map.fitBounds(bounds, { paddingTopLeft: [24, 110], paddingBottomRight: [24, window.innerWidth < 640 ? 96 : 24], maxZoom: 17, animate: true });
+      map.fitBounds(bounds, { paddingTopLeft: [24, 110], paddingBottomRight: [24, window.innerWidth < 640 ? 150 : 24], maxZoom: 17, animate: true });
     }
 
     function onSearchWindowInput() {
