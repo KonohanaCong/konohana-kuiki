@@ -219,11 +219,24 @@
     .mansion-pin-icon { transition: opacity .2s; }
 
     /* ===== スマホ用：ヘッダー（左にメニュー・中央にロゴ）・下の操作パネル ===== */
+    /* ===== ヘッダー・下の操作パネル：ログイン画面と同じ深緑に白い文字 ===== */
+    #appHeader { background: #0e4d45 !important; border-bottom: 0 !important; box-shadow: 0 2px 10px rgba(0,0,0,0.25) !important; }
+    #appHeader h1 { color: #ffffff !important; }
+    #appHeader h1 + span { color: #cfeee7 !important; }
+    #appHeader #btnHamburger, #appHeader #btnSearch { color: #ffffff !important; }
+    #appHeader #btnHamburger:hover, #appHeader #btnHamburger:active, #appHeader #btnSearch:hover, #appHeader #btnSearch:active { background: rgba(255,255,255,0.14) !important; }
+    #appHeader button[aria-label="現在地に移動"] { background: rgba(255,255,255,0.18) !important; }
+    #appHeader .bg-gradient-to-l { display: none; }
+    #mobileBar { background: rgba(14,77,69,0.97) !important; border-color: rgba(255,255,255,0.12) !important; }
+    .dock-btn { color: #e6f4f1; }
+    .dock-btn:active { background: rgba(255,255,255,0.14); }
+    .dock-btn.dock-on { background: #ffffff; color: #0e4d45; }
+
     /* ===== メニュー・各ページ（スマホは全画面で右から出る） ===== */
     .menu-page-head, .menu-chev, .ic-mob { display: none; }
     @keyframes pageIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     @keyframes pageOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
-    #mobileBar { display: none; }
+    #mobileBar { display: none; bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
     #mobileBar button { -webkit-tap-highlight-color: transparent; }
     #mobileBar button:focus { outline: none; }
     .sheet-grip { display: none; }
@@ -236,8 +249,8 @@
       #appHeader #headerControls { position: absolute; left: .5rem; top: 50%; transform: translateY(-50%); }
       .hdr-desk { display: none !important; }
       .leaflet-control-zoom { display: none !important; }
-      .leaflet-bottom { bottom: 5.2rem; }
-      #statusToast { bottom: 6.2rem !important; }
+      .leaflet-bottom { bottom: 6.6rem; }
+      #statusToast { bottom: 7.6rem !important; }
       #mobileBar.on { display: flex; flex-direction: column; z-index: 35; }
       /* メニュー：全画面の一覧 */
       #hamburgerDropdown { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0; width: auto !important; max-width: none;
@@ -271,8 +284,8 @@
       #listDrawer:not(.translate-x-full) { transform: none; }
       #listDrawer.sheet-dragging { transition: none; }
       #listDrawer .sheet-head { touch-action: none; }
-      #drawerContent { padding-bottom: 6rem; }
-      #btnDrawerTop { bottom: 6rem !important; }
+      #drawerContent { padding-bottom: 7rem; }
+      #btnDrawerTop { bottom: 7rem !important; }
       #headerAreaFilter { display: none !important; }
     }
 
@@ -552,21 +565,21 @@
 
 
     <!-- スマホ用：下の操作バー -->
-    <div id="mobileBar" class="absolute left-2 right-2 bottom-3 z-20 bg-white/95 backdrop-blur rounded-3xl shadow-xl border border-slate-200 px-1 py-1 btn-touch-ui">
+    <div id="mobileBar" class="absolute left-3 right-3 z-20 backdrop-blur rounded-3xl shadow-xl border px-1 py-1 btn-touch-ui">
       <div class="flex items-stretch gap-0.5">
-        <button type="button" id="dock-home" onclick="dockHome()" aria-label="ホーム" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <button type="button" id="dock-home" onclick="dockHome()" aria-label="ホーム" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center dock-btn">
           <i class="fas fa-house text-base"></i><span class="text-[10px] font-bold mt-0.5">ホーム</span>
         </button>
-        <button type="button" onclick="toggleMansionListDrawer()" id="mobileListBtn" aria-label="一覧" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <button type="button" onclick="toggleMansionListDrawer()" id="mobileListBtn" aria-label="一覧" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center dock-btn">
           <i class="fas fa-list text-base" id="mobileListIcon"></i><span class="text-[10px] font-bold mt-0.5" id="mobileListLabel">一覧</span>
         </button>
-        <button type="button" id="dock-search" onclick="dockSearch()" aria-label="検索" class="relative flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <button type="button" id="dock-search" onclick="dockSearch()" aria-label="検索" class="relative flex-1 py-1.5 rounded-2xl flex flex-col items-center dock-btn">
           <i class="fas fa-search text-base"></i><span class="text-[10px] font-bold mt-0.5">検索</span>
         </button>
-        <button type="button" id="dock-loc" onclick="moveToCurrentLocation()" aria-label="現在地" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <button type="button" id="dock-loc" onclick="moveToCurrentLocation()" aria-label="現在地" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center dock-btn">
           <i class="fas fa-crosshairs text-base"></i><span class="text-[10px] font-bold mt-0.5">現在地</span>
         </button>
-        <button type="button" id="dock-filter" onclick="dockFilter()" aria-label="絞込" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100">
+        <button type="button" id="dock-filter" onclick="dockFilter()" aria-label="絞込" class="flex-1 py-1.5 rounded-2xl flex flex-col items-center dock-btn">
           <i class="fas fa-sliders text-base"></i><span class="text-[10px] font-bold mt-0.5">絞込</span>
         </button>
       </div>
@@ -1030,7 +1043,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.13-6';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.13-7';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -3092,8 +3105,8 @@
     function filtersActive() { return currentAreaFilter !== 'ALL' || !!currentSheetFilter; }
 
     function updateDock() {
-      const on = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center text-white bg-[#13685e] active:bg-[#0a3f39]';
-      const off = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center text-slate-700 active:bg-slate-100';
+      const on = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center dock-btn dock-on';
+      const off = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center dock-btn';
       const win = document.getElementById('searchWindow');
       const searchOpen = !!(win && !win.classList.contains('hidden'));
       const fs = document.getElementById('filterSheet');
@@ -3244,7 +3257,7 @@
           map.setView(bounds[0], 16);
         } else {
           const mob = window.innerWidth < 640;
-          map.fitBounds(bounds, { paddingTopLeft: [40, mob ? 70 : 40], paddingBottomRight: [40, mob ? 100 : 40], maxZoom: 16 });
+          map.fitBounds(bounds, { paddingTopLeft: [40, mob ? 70 : 40], paddingBottomRight: [40, mob ? 112 : 40], maxZoom: 16 });
         }
       }
     }
@@ -3422,7 +3435,7 @@
         return;
       }
       const bounds = L.latLngBounds(list.map(m => [m.lat, m.lng]));
-      map.fitBounds(bounds, { paddingTopLeft: [24, 110], paddingBottomRight: [24, window.innerWidth < 640 ? 100 : 24], maxZoom: 17, animate: true });
+      map.fitBounds(bounds, { paddingTopLeft: [24, 110], paddingBottomRight: [24, window.innerWidth < 640 ? 112 : 24], maxZoom: 17, animate: true });
     }
 
     function onSearchWindowInput() {
