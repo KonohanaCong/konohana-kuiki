@@ -351,14 +351,18 @@
   <!-- 上部ヘッダー -->
   <header id="appHeader" class="bg-white text-slate-800 px-3.5 sm:px-4 pt-2.5 pb-2 flex flex-col gap-2 shadow-sm z-[9999] shrink-0 relative border-b border-slate-100 btn-touch-ui">
     <div class="hdr-row1 flex items-center justify-between w-full gap-2">
-      <div class="flex items-center shrink-0" style="gap:10px;">
-        <!-- ヘッダーのロゴ：白抜きのマーク＋日本語とローマ字を同じ幅にそろえた文字 -->
-        <div class="shrink-0" style="width:34px;height:36px;">
-          <svg viewBox="96 60 320 330" style="width:100%;height:100%;display:block;" aria-hidden="true"><path fill="#ffffff" d="M 176 100 C 153.9 100 136 117.9 136 140 L 136 348 C 136 354.6 141.4 360 148 360 L 216 360 L 216 304 C 216 281.9 233.9 264 256 264 C 278.1 264 296 281.9 296 304 L 296 360 L 364 360 C 370.6 360 376 354.6 376 348 L 376 140 C 376 117.9 358.1 100 336 100 Z M 184 148 A 16 16 0 0 1 216 148 A 16 16 0 0 1 184 148 Z M 240 148 A 16 16 0 0 1 272 148 A 16 16 0 0 1 240 148 Z M 296 148 A 16 16 0 0 1 328 148 A 16 16 0 0 1 296 148 Z M 184 204 A 16 16 0 0 1 216 204 A 16 16 0 0 1 184 204 Z M 240 204 A 16 16 0 0 1 272 204 A 16 16 0 0 1 240 204 Z M 296 204 A 16 16 0 0 1 328 204 A 16 16 0 0 1 296 204 Z"/></svg>
+      <div class="flex items-center gap-2 shrink-0">
+        <!-- ヘッダーアイコン (SVG) -->
+        <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-sm shrink-0 overflow-hidden border border-slate-200">
+          <svg viewBox="0 0 512 512" class="w-full h-full">
+            <rect width="512" height="512" rx="110" fill="#ffffff"/>
+            <path fill="#0e4d45" d="M 176 100 C 153.9 100 136 117.9 136 140 L 136 348 C 136 354.6 141.4 360 148 360 L 216 360 L 216 304 C 216 281.9 233.9 264 256 264 C 278.1 264 296 281.9 296 304 L 296 360 L 364 360 C 370.6 360 376 354.6 376 348 L 376 140 C 376 117.9 358.1 100 336 100 Z M 184 148 A 16 16 0 0 1 216 148 A 16 16 0 0 1 184 148 Z M 240 148 A 16 16 0 0 1 272 148 A 16 16 0 0 1 240 148 Z M 296 148 A 16 16 0 0 1 328 148 A 16 16 0 0 1 296 148 Z M 184 204 A 16 16 0 0 1 216 204 A 16 16 0 0 1 184 204 Z M 240 204 A 16 16 0 0 1 272 204 A 16 16 0 0 1 240 204 Z M 296 204 A 16 16 0 0 1 328 204 A 16 16 0 0 1 296 204 Z"/>
+            <text x="256" y="424" fill="#0e4d45" font-family="-apple-system, BlinkMacSystemFont, Arial, sans-serif" font-weight="800" font-size="38" letter-spacing="3" text-anchor="middle">KONOHANA KUIKI</text>
+          </svg>
         </div>
-        <div id="hdrLogotype" class="flex flex-col shrink-0">
-          <h1 id="hdrLogoJp" style="font-size:20px;line-height:1.1;letter-spacing:.12em;font-weight:700;margin:0;white-space:nowrap;">此花区域</h1>
-          <span id="hdrLogoRo" style="font-size:9px;font-weight:600;margin-top:4px;line-height:1;white-space:nowrap;letter-spacing:0;">KONOHANA KUIKI</span>
+        <div class="flex flex-col shrink-0">
+          <h1 class="text-base sm:text-lg font-bold tracking-tight text-slate-800 whitespace-nowrap leading-tight">此花区域</h1>
+          <span class="text-[9px] sm:text-[10px] tracking-[0.22em] font-semibold text-[#13685e] whitespace-nowrap leading-none mt-0.5">KONOHANA KUIKI</span>
         </div>
       </div>
 
@@ -1039,7 +1043,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.13-8';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.13-7';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
@@ -3067,22 +3071,6 @@
         if (el) el.classList.toggle('kpin-sel', sel);
       });
     }
-
-    // ヘッダーの「KONOHANA KUIKI」の字間を調整して、「此花区域」と同じ幅にそろえる
-    function fitHeaderLogotype() {
-      const jp = document.getElementById('hdrLogoJp');
-      const ro = document.getElementById('hdrLogoRo');
-      if (!jp || !ro) return;
-      ro.style.letterSpacing = '0px';
-      const target = jp.getBoundingClientRect().width - parseFloat(getComputedStyle(jp).letterSpacing || '0');   // 最後の字間は幅に含めない
-      const base = ro.getBoundingClientRect().width;
-      const n = ro.textContent.length - 1;
-      if (target > 0 && base > 0 && n > 0) ro.style.letterSpacing = ((target - base) / n) + 'px';
-    }
-    (function () {
-      const run = () => { fitHeaderLogotype(); if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeaderLogotype); window.addEventListener('load', fitHeaderLogotype); };
-      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
-    })();
 
     // 「ホーム」：絞り込み・検索をすべて解除して、全マンションが見える最初の表示に戻す
     function goHome(noHighlight) {
