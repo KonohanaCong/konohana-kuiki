@@ -1076,7 +1076,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.14-12';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.15-1';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     // 各ページの本文を .pg-body で包む（パソコンでは display:contents で見た目は変わらず、スマホでは白いカードになる）
     document.addEventListener('DOMContentLoaded', () => {
       ['settingsSheet', 'statsModal', 'adminCheckModal', 'reportModal', 'adminModal'].forEach(id => {
@@ -1791,17 +1791,26 @@
       if (btn) btn.disabled = true;
       errEl.textContent = '確認中...';
 
-      loadAdminLinks(pw, (res) => {
-        if (btn) btn.disabled = false;
-        if (res && res.success) {
-          closeAdminModal();
-          updateAdminUI();
-          refreshAdminViews();
-          showToast('管理者モードになりました', false);
-        } else {
-          errEl.textContent = (res && res.error) ? res.error : '確認できませんでした';
-        }
-      });
+      // パスワードの確認だけを先に行い（すぐ終わる）、スプレッドシートのURL一覧は、そのあと裏で読み込む
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (btn) btn.disabled = false;
+          if (res && res.success) {
+            adminPasswordMem = pw;
+            closeAdminModal();
+            updateAdminUI();
+            refreshAdminViews();
+            showToast('管理者モードになりました', false);
+            refreshAdminLinksQuietly();
+          } else {
+            errEl.textContent = (res && res.error) ? res.error : '確認できませんでした';
+          }
+        })
+        .withFailureHandler((err) => {
+          if (btn) btn.disabled = false;
+          errEl.textContent = (err && err.message) || '通信エラー';
+        })
+        .checkAdminPassword(userAuthPassword, pw);
     }
 
     // データを更新したあと、管理者モード中ならスプレッドシートのURLも最新にする（静かに実行）
