@@ -253,6 +253,7 @@
       .leaflet-control-zoom { display: none !important; }
       .leaflet-bottom { bottom: 6.6rem; }
       #statusToast { bottom: 7.6rem !important; }
+      #searchWindow { bottom: calc(6.6rem + env(safe-area-inset-bottom, 0px)); }   /* 下の操作パネルは、検索中も押せる */
       #mobileBar.on { display: flex; flex-direction: column; z-index: 35; }
       /* メニュー：全画面の一覧 */
       #hamburgerDropdown { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0; width: auto !important; max-width: none;
@@ -1052,7 +1053,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.14-6';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.14-7';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     document.addEventListener('DOMContentLoaded',()=>{const e=document.getElementById('menuVer'); if(e) e.textContent='Ver. '+APP_VERSION;});
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
@@ -3112,6 +3113,7 @@
     // 「ホーム」：絞り込み・検索をすべて解除して、全マンションが見える最初の表示に戻す
     function goHome(noHighlight) {
       closeHamburgerMenu();
+      closeSearchWindow();
       dockActive = noHighlight === true ? null : 'home';
       currentAreaFilter = 'ALL';
       currentSheetFilter = '';
@@ -3188,6 +3190,7 @@
       const fs = document.getElementById('filterSheet');
       const open = !!(fs && !fs.classList.contains('hidden'));
       if (!open && filtersActive()) { resetFilters(); updateDock(); return; }
+      closeSearchWindow();
       openFilterSheet();
     }
 
@@ -3595,6 +3598,7 @@
     }
 
     function moveToCurrentLocation() {
+      closeSearchWindow();   // 検索の窓が開いていたら閉じて、すぐ現在地へ
       // 緑の状態でもう一度押したら、緑を解除してホームの表示に戻る
       if (dockActive === 'loc') { goHome(true); return; }
       if (userCoordinates && map) {
