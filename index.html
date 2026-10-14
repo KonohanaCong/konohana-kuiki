@@ -1052,7 +1052,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.14-5';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.14-6';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     document.addEventListener('DOMContentLoaded',()=>{const e=document.getElementById('menuVer'); if(e) e.textContent='Ver. '+APP_VERSION;});
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
@@ -3439,6 +3439,7 @@
     // 検索ボタン：検索の窓だけを開く（入力すると地図のピン・一覧が絞り込まれる）
     function openSearchScreen() {
       closeHamburgerMenu();
+      if (window.innerWidth < 640 && isDrawerOpen) toggleMansionListDrawer();   // 一覧は閉じて、検索だけを開く
       dockActive = 'search';
       updateDock();
       const main = document.getElementById('mansionSearchInput');
@@ -3520,6 +3521,10 @@
       isDrawerOpen = !isDrawerOpen;
 
       if (isDrawerOpen) {
+        if (window.innerWidth < 640) {   // 検索の窓は閉じて、一覧だけを開く
+          const sw = document.getElementById('searchWindow');
+          if (sw && !sw.classList.contains('hidden')) closeSearchWindow();
+        }
         closeDetailSheet();
         setSheetState('half');
         drawer.classList.remove("translate-x-full");
