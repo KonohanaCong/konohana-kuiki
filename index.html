@@ -233,7 +233,7 @@
     .dock-btn.dock-on { background: #ffffff; color: #0e4d45; }
 
     /* ===== メニュー・各ページ（スマホは全画面で右から出る） ===== */
-    .menu-page-head, .menu-chev, .ic-mob { display: none; }
+    .menu-page-head, .menu-chev, .ic-mob, .menu-foot { display: none; }
     @keyframes pageIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
     @keyframes pageOut { from { transform: translateX(0); } to { transform: translateX(100%); } }
     #mobileBar { display: none; bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
@@ -257,12 +257,21 @@
         border: 0; border-radius: 0; box-shadow: none; padding: 0 !important; gap: 0 !important; background: #f4f5f6 !important; overflow-y: auto; z-index: 10001; }
       #hamburgerDropdown:not(.hidden) { animation: pageIn .28s ease-out; }
       #hamburgerDropdown.page-out { animation: pageOut .25s ease-in forwards; pointer-events: none; }
-      #hamburgerDropdown > button { background: #fff; border-radius: 0 !important; border-bottom: 1px solid #eceef0; padding: 1.15rem 1.25rem !important; font-size: 1rem !important; gap: .85rem !important; }
-      #hamburgerDropdown > button > i:first-child { width: 1.4rem !important; font-size: 1.05rem; text-align: center; }
-      #hamburgerDropdown .menu-chev { display: inline-block; margin-left: auto; font-size: .8rem; color: #9aa3ad; }
-      #hamburgerDropdown > .h-px { height: 1rem; margin: 0 !important; background: #f4f5f6; }
-      .menu-page-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; background: #fff; border-bottom: 1px solid #eceef0;
-        padding: calc(.9rem + env(safe-area-inset-top)) 1.1rem .9rem; position: sticky; top: 0; z-index: 5; }
+      #hamburgerDropdown > button { background: #fff; border-radius: 16px !important; border: 0; margin: .6rem 1rem 0 !important; width: auto !important; padding: .95rem 1rem !important; font-size: 1rem !important; gap: .9rem !important;
+        box-shadow: 0 1px 2px rgba(14,77,69,.06), 0 4px 14px rgba(14,77,69,.06); color: #1f2a37; font-weight: 600; }
+      #hamburgerDropdown > button:active { background: #eef5f3; }
+      #hamburgerDropdown > button > i:first-child { width: 2.3rem !important; height: 2.3rem; line-height: 2.3rem; font-size: 1rem; text-align: center; border-radius: 12px; background: rgba(14,77,69,.08); flex: none; }
+      #hamburgerDropdown > button.menu-danger > i:first-child { background: #fdecec; }
+      #hamburgerDropdown .menu-chev { display: inline-block; margin-left: auto; font-size: .75rem; color: #b3bcc6; }
+      #hamburgerDropdown > .h-px { height: .6rem; margin: 0 !important; background: transparent; }
+      #hamburgerDropdown .menu-foot { display: flex !important; flex-direction: column; align-items: center; gap: .25rem; margin-top: auto; padding: 2rem 1rem calc(1.6rem + env(safe-area-inset-bottom)); color: #8a97a3; }
+      #hamburgerDropdown .menu-foot b { font-size: .8rem; letter-spacing: .14em; color: #0e4d45; }
+      #hamburgerDropdown .menu-foot span { font-size: .65rem; letter-spacing: .06em; }
+      .menu-page-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; background: #0e4d45; color: #fff;
+        padding: calc(1rem + env(safe-area-inset-top)) 1.1rem 1rem; position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 10px rgba(14,77,69,.25); }
+      .menu-page-head span { color: #fff !important; letter-spacing: .08em; }
+      .menu-page-head button { color: #fff !important; background: rgba(255,255,255,.14) !important; border-radius: 999px; width: 2.4rem; height: 2.4rem; padding: 0 !important; margin: 0 !important; display: flex; align-items: center; justify-content: center; }
+      .menu-page-head button i { color: #fff !important; font-size: 1rem !important; }
       /* 各ページ：全画面・右から出る・右上に戻る(〈) */
       .page-modal { background: #fff !important; backdrop-filter: none !important; padding: 0 !important; align-items: stretch !important; justify-content: stretch !important; }
       .page-modal:not(.hidden) { animation: pageIn .28s ease-out; }
@@ -411,11 +420,12 @@
         <i class="fas fa-chevron-right menu-chev"></i>
       </button>
       <div class="h-px bg-slate-100 my-0.5"></div>
-      <button onclick="logout()" class="w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 rounded-xl flex items-center gap-2 transition font-semibold">
+      <button onclick="logout()" class="menu-danger w-full text-left px-3.5 py-2.5 text-xs text-red-500 hover:bg-red-50 rounded-xl flex items-center gap-2 transition font-semibold">
         <i class="fas fa-sign-out-alt text-red-500 w-4"></i>
         <span>ログアウト</span>
         <i class="fas fa-chevron-right menu-chev"></i>
       </button>
+      <div class="menu-foot"><b>此花区域</b><span>KONOHANA KUIKI</span><span id="menuVer"></span></div>
     </div>
 
     <!-- 2行目：エリアフィルター ＆ 絞込（スマホでは、絞込シートに移っています） -->
@@ -1039,7 +1049,8 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.13-9';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.14-1';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    document.addEventListener('DOMContentLoaded',()=>{const e=document.getElementById('menuVer'); if(e) e.textContent='Ver. '+APP_VERSION;});
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
     const PENDING_KEY = 'konohana_pending_v1';          // 電波がなくて送れなかった記録
