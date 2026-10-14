@@ -913,10 +913,15 @@
   </div>
 
   <!-- 管理者パスワードの入力 -->
-  <div id="adminModal" class="hidden fixed inset-0 z-[10005] bg-slate-950/60 flex items-center justify-center p-4 btn-touch-ui" onclick="closeAdminModal()">
+  <div id="adminModal" class="page-modal page-anim hidden fixed inset-0 z-[10005] bg-slate-950/60 flex items-center justify-center p-4 btn-touch-ui" onclick="closeAdminModal()">
     <div onclick="event.stopPropagation()" class="bg-white w-full max-w-sm rounded-3xl shadow-2xl border border-slate-100 p-6">
-      <div class="flex items-center gap-2 text-slate-800 font-bold text-lg mb-1">
-        <i class="fas fa-lock text-slate-500"></i><span>管理者モード</span>
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2 text-slate-800 font-bold text-lg">
+          <i class="fas fa-lock text-slate-500"></i><span>管理者モード</span>
+        </div>
+        <button type="button" onclick="closeAdminModal()" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition">
+          <i class="fas fa-times text-lg ic-desk"></i><i class="fas fa-chevron-left text-lg ic-mob"></i>
+        </button>
       </div>
       <p class="text-xs text-slate-500 mb-3 leading-relaxed">管理者パスワードを入力すると、部屋番号シートをスプレッドシートで開けるようになります。</p>
       <form onsubmit="submitAdminPassword(event)">
@@ -1067,10 +1072,10 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.14-9';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.14-10';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     // 各ページの本文を .pg-body で包む（パソコンでは display:contents で見た目は変わらず、スマホでは白いカードになる）
     document.addEventListener('DOMContentLoaded', () => {
-      ['settingsSheet', 'statsModal', 'adminCheckModal', 'reportModal'].forEach(id => {
+      ['settingsSheet', 'statsModal', 'adminCheckModal', 'reportModal', 'adminModal'].forEach(id => {
         const inner = document.querySelector('#' + id + ' > div');
         if (!inner || inner.querySelector(':scope > .pg-body')) return;
         const kids = Array.from(inner.children).slice(1);
@@ -1749,13 +1754,12 @@
       }
       document.getElementById('adminError').textContent = '';
       document.getElementById('adminPasswordInput').value = '';
-      document.getElementById('adminModal').classList.remove('hidden');
+      showPage(document.getElementById('adminModal'));
       setTimeout(() => { const i = document.getElementById('adminPasswordInput'); if (i) i.focus(); }, 50);
     }
 
     function closeAdminModal() {
-      const el = document.getElementById('adminModal');
-      if (el) el.classList.add('hidden');
+      hidePage(document.getElementById('adminModal'));
     }
 
     // 管理者パスワードの確認と同時に、部屋番号スプレッドシートのURL一覧を受け取る
