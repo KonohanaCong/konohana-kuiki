@@ -1046,7 +1046,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.14-3';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.14-4';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     document.addEventListener('DOMContentLoaded',()=>{const e=document.getElementById('menuVer'); if(e) e.textContent='Ver. '+APP_VERSION;});
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
@@ -3258,8 +3258,8 @@
     function setMobileListBtn(open) {
       const ic = document.getElementById('mobileListIcon');
       const lb = document.getElementById('mobileListLabel');
-      if (ic) ic.className = open ? 'fas fa-map text-base' : 'fas fa-list text-base';
-      if (lb) lb.textContent = open ? '地図' : '一覧';
+      if (ic) ic.className = 'fas fa-list text-base';   // 開いていても名前は「一覧」のまま（緑で状態を示す）
+      if (lb) lb.textContent = '一覧';
     }
 
     function renderMarkers(shouldFitBounds = false) {
@@ -3523,6 +3523,7 @@
         renderDrawerList();
         setHdrHidden(true, true);
         setMobileListBtn(true);
+        if (dockActive === 'home' || dockActive === 'loc') dockActive = null;   // 一覧だけを緑にする
         updateDock();
       } else {
         setHdrHidden(false, true);
