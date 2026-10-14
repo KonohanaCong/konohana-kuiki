@@ -222,6 +222,7 @@
     /* ===== ヘッダー・下の操作パネル：白ベース（ロゴと選択色だけ深緑） ===== */
     #appHeader h1 { color: #0e4d45 !important; }
     #appHeader h1 + span { color: #5f6b76 !important; }
+    #adminExitBtn { font-size: 11px; padding: .35rem .8rem; }
     #hdrLogoMark svg path { fill: #0e4d45; }
     #mobileBar { background: rgba(255,255,255,0.96) !important; border-color: #e2e8f0 !important; }
     .dock-btn:active { background: #f1f5f9; }
@@ -247,7 +248,8 @@
       #appHeader { position: absolute; top: calc(.6rem + env(safe-area-inset-top, 0px)); left: .75rem; right: .75rem; transition: transform .28s ease;
         border-radius: 1.5rem; border: 1px solid #e2e8f0 !important; box-shadow: 0 10px 24px rgba(15,23,42,.16) !important; background: rgba(255,255,255,.97) !important;
         padding: .3rem .75rem !important; gap: 0 !important; }
-      body.admin-on #appHeader { top: calc(2rem + env(safe-area-inset-top, 0px)); }
+      #adminExitBtn { position: absolute; right: .55rem; top: 50%; transform: translateY(-50%); font-size: 10px; padding: .3rem .55rem; max-width: 5.6rem; text-align: left; }
+      #adminExitBtn span { white-space: normal; }
       #appHeader.hdr-hide { transform: translateY(-220%); }
       #hdrLogoMark svg { height: 28px !important; }
       #hdrLogoJp { font-size: 16px !important; }
@@ -356,9 +358,6 @@
     #loginHelp summary::-webkit-details-marker { display: none; }
     #loginHelp[open] .login-help-chevron { transform: rotate(180deg); }
 
-    /* 管理者モード中は、上の帯の分だけ全体を下げる */
-    body.admin-on { padding-top: 1.5rem; }
-
     /* 文字サイズ「大」 */
     body.font-large .text-xs { font-size: 0.95rem; line-height: 1.4rem; }
     body.font-large .text-sm { font-size: 1.05rem; line-height: 1.55rem; }
@@ -370,14 +369,6 @@
 </head>
 <body class="bg-slate-100 flex flex-col h-[100dvh]">
 
-  <!-- 管理者モード中だけ、どの画面でも最上部に出る帯 -->
-  <div id="adminStrip" class="hidden fixed top-0 left-0 right-0 z-[20000] h-6 bg-amber-400 text-amber-950 text-[11px] font-bold items-center justify-between px-3 shadow btn-touch-ui">
-    <span class="flex items-center gap-1.5"><i class="fas fa-lock-open text-[10px]"></i>管理者モード</span>
-    <span class="flex items-center gap-3">
-      <a id="adminMainLink" href="#" target="_blank" rel="noopener" class="hidden items-center gap-1 underline decoration-dotted"><i class="fas fa-table text-[10px]"></i>メインのシート</a>
-      <button type="button" onclick="exitAdminMode()" class="underline decoration-dotted">終了</button>
-    </span>
-  </div>
 
   <!-- 上部ヘッダー -->
   <header id="appHeader" class="bg-white text-slate-800 px-3.5 sm:px-4 pt-2.5 pb-2 flex flex-col gap-2 shadow-sm z-[9999] shrink-0 relative border-b border-slate-100 btn-touch-ui">
@@ -408,6 +399,7 @@
           <i class="fas fa-bars"></i>
         </button>
       </div>
+      <button id="adminExitBtn" type="button" onclick="exitAdminMode()" title="管理者モードを終了" class="hidden items-center gap-1 shrink-0 rounded-full bg-amber-400 text-amber-950 font-bold leading-tight shadow-sm active:bg-amber-500"><i class="fas fa-lock-open"></i><span>管理者モード終了</span></button>
     </div>
 
     <!-- ハンバーガーメニュー ドロップダウン -->
@@ -1076,7 +1068,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.15-1';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.15-2';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     // 各ページの本文を .pg-body で包む（パソコンでは display:contents で見た目は変わらず、スマホでは白いカードになる）
     document.addEventListener('DOMContentLoaded', () => {
       ['settingsSheet', 'statsModal', 'adminCheckModal', 'reportModal', 'adminModal'].forEach(id => {
@@ -1704,19 +1696,11 @@
       const chk = document.getElementById('adminCheckMenuBtn');
       if (chk) chk.classList.toggle('hidden', !on);
 
-      // どの画面でも見える「管理者モード」の帯
-      const strip = document.getElementById('adminStrip');
-      if (strip) { strip.classList.toggle('hidden', !on); strip.classList.toggle('flex', on); }
+      // ヘッダーの「管理者モード終了」ボタン
+      const exitBtn = document.getElementById('adminExitBtn');
+      if (exitBtn) { exitBtn.classList.toggle('hidden', !on); exitBtn.classList.toggle('flex', on); }
       document.body.classList.toggle('admin-on', on);
       if (map) setTimeout(() => map.invalidateSize(), 50);
-
-      const main = document.getElementById('adminMainLink');
-      if (main) {
-        const ok = on && /^https:\/\/docs\.google\.com\//.test(adminMainUrl);
-        main.classList.toggle('hidden', !ok);
-        main.classList.toggle('flex', ok);
-        if (ok) main.href = adminMainUrl;
-      }
 
       // 部屋番号画面の「スプレッドシートで開く」リンク
       const btn = document.getElementById('roomSheetOpenLink');
