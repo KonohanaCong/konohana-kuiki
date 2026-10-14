@@ -238,10 +238,16 @@
     .sheet-grip { display: none; }
     @media (max-width: 639px) {
       .sheet-grip { display: block; }
-      #appHeader { position: absolute; top: 0; left: 0; right: 0; transition: transform .28s ease; }
-      body.admin-on #appHeader { top: 1.5rem; }
-      #appHeader.hdr-hide { transform: translateY(-140%); }
-      #appHeader .hdr-row1 { justify-content: center; min-height: 2.5rem; }
+      /* 薄い・浮いたカード型ヘッダー（下の操作パネルと同じ角丸・余白） */
+      #appHeader { position: absolute; top: calc(.6rem + env(safe-area-inset-top, 0px)); left: .75rem; right: .75rem; transition: transform .28s ease;
+        border-radius: 1.5rem; border: 1px solid #e2e8f0 !important; box-shadow: 0 10px 24px rgba(15,23,42,.16) !important; background: rgba(255,255,255,.97) !important;
+        padding: .3rem .75rem !important; gap: 0 !important; }
+      body.admin-on #appHeader { top: calc(2rem + env(safe-area-inset-top, 0px)); }
+      #appHeader.hdr-hide { transform: translateY(-220%); }
+      #hdrLogoMark svg { height: 28px !important; }
+      #hdrLogoJp { font-size: 16px !important; }
+      #hdrLogoRo { font-size: 8px !important; margin-top: 3px !important; }
+      #appHeader .hdr-row1 { justify-content: center; min-height: 2.4rem; }
       #appHeader #headerControls { position: absolute; left: .5rem; top: 50%; transform: translateY(-50%); }
       .hdr-desk { display: none !important; }
       .leaflet-control-zoom { display: none !important; }
@@ -1046,7 +1052,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.14-4';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.14-5';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     document.addEventListener('DOMContentLoaded',()=>{const e=document.getElementById('menuVer'); if(e) e.textContent='Ver. '+APP_VERSION;});
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
