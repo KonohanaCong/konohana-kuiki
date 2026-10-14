@@ -224,10 +224,13 @@
     #appHeader h1 + span { color: #5f6b76 !important; }
     #hdrLogoMark svg path { fill: #0e4d45; }
     #mobileBar { background: rgba(255,255,255,0.96) !important; border-color: #e2e8f0 !important; }
-    .dock-btn { color: #334155; }
     .dock-btn:active { background: #f1f5f9; }
-    .dock-btn.dock-on { background: transparent; color: #13685e; }
+    .dock-btn { color: #64748b; position: relative; }
+    .dock-btn.dock-on { background: transparent; color: #0e4d45; }
     .dock-btn.dock-on span { font-weight: 800; }
+    .dock-btn.dock-on i { transform: scale(1.15); }
+    .dock-btn i { transition: transform .15s ease; }
+    .dock-btn.dock-on::before { content: ''; position: absolute; top: 1px; left: 50%; width: 1.6rem; height: 3px; margin-left: -.8rem; border-radius: 3px; background: #0e4d45; }
 
     /* ===== メニュー・各ページ（スマホは全画面で右から出る） ===== */
     .menu-page-head, .menu-chev, .ic-mob, .menu-foot { display: none; }
@@ -1073,7 +1076,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.14-11';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.14-12';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     // 各ページの本文を .pg-body で包む（パソコンでは display:contents で見た目は変わらず、スマホでは白いカードになる）
     document.addEventListener('DOMContentLoaded', () => {
       ['settingsSheet', 'statsModal', 'adminCheckModal', 'reportModal', 'adminModal'].forEach(id => {
