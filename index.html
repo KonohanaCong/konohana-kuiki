@@ -219,18 +219,14 @@
     .mansion-pin-icon { transition: opacity .2s; }
 
     /* ===== スマホ用：ヘッダー（左にメニュー・中央にロゴ）・下の操作パネル ===== */
-    /* ===== ヘッダー・下の操作パネル：ログイン画面と同じ深緑に白い文字 ===== */
-    #appHeader { background: #0e4d45 !important; border-bottom: 0 !important; box-shadow: 0 2px 10px rgba(0,0,0,0.25) !important; }
-    #appHeader h1 { color: #ffffff !important; }
-    #appHeader h1 + span { color: #cfeee7 !important; }
-    #appHeader #btnHamburger, #appHeader #btnSearch { color: #ffffff !important; }
-    #appHeader #btnHamburger:hover, #appHeader #btnHamburger:active, #appHeader #btnSearch:hover, #appHeader #btnSearch:active { background: rgba(255,255,255,0.14) !important; }
-    #appHeader button[aria-label="現在地に移動"] { background: rgba(255,255,255,0.18) !important; }
-    #appHeader .bg-gradient-to-l { display: none; }
-    #mobileBar { background: rgba(14,77,69,0.97) !important; border-color: rgba(255,255,255,0.12) !important; }
-    .dock-btn { color: #e6f4f1; }
-    .dock-btn:active { background: rgba(255,255,255,0.14); }
-    .dock-btn.dock-on { background: #ffffff; color: #0e4d45; }
+    /* ===== ヘッダー・下の操作パネル：白ベース（ロゴと選択色だけ深緑） ===== */
+    #appHeader h1 { color: #0e4d45 !important; }
+    #appHeader h1 + span { color: #5f6b76 !important; }
+    #hdrLogoMark svg path { fill: #0e4d45; }
+    #mobileBar { background: rgba(255,255,255,0.96) !important; border-color: #e2e8f0 !important; }
+    .dock-btn { color: #334155; }
+    .dock-btn:active { background: #f1f5f9; }
+    .dock-btn.dock-on { background: #13685e; color: #ffffff; }
 
     /* ===== メニュー・各ページ（スマホは全画面で右から出る） ===== */
     .menu-page-head, .menu-chev, .ic-mob, .menu-foot { display: none; }
@@ -1050,7 +1046,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.14-2';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.14-3';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     document.addEventListener('DOMContentLoaded',()=>{const e=document.getElementById('menuVer'); if(e) e.textContent='Ver. '+APP_VERSION;});
     const ROOM_CACHE_KEY = 'konohana_room_cache_v1';    // 部屋番号一覧の端末保存（次に開くとき先に表示する）
     const ROOM_CACHE_MAX = 40;
