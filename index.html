@@ -4,6 +4,16 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>此花区域</title>
+  <script>
+    // 表示モード（自動／ライト／ダーク）を、画面が出る前に反映する（ちらつき防止）
+    (function () {
+      try {
+        var m = localStorage.getItem('kk_theme') || 'auto';
+        var dark = m === 'dark' || (m === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    })();
+  </script>
 
   <!-- Web App & PWA Settings -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,6 +23,7 @@
   <meta name="theme-color" content="#0e4d45">
 
   <!-- iPhone ホーム画面用アイコン & ファビコン -->
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 
@@ -219,6 +230,28 @@
     .mansion-pin-icon { transition: opacity .2s; }
 
     /* ===== スマホ用：ヘッダー（左にメニュー・中央にロゴ）・下の操作パネル ===== */
+    /* ===== マンション詳細シート：深緑の帯 ＋ 白い本文（メニュー系の画面と同じ） ===== */
+    #detailSheet { overflow-x: hidden; }
+    #detailSheet > div:first-child { background: #0e4d45; padding-bottom: .35rem; }
+    #detailSheet > button { color: #fff !important; background: rgba(255,255,255,.16); }
+    #detailSheet > button:hover { background: rgba(255,255,255,.26) !important; }
+    #detailContent .dt-head { background: #0e4d45; color: #fff; padding: .4rem 1rem 1.1rem; }
+    #detailContent .dt-head h3 { color: #fff; font-size: 1.1rem; letter-spacing: .02em; }
+    #detailContent .dt-head p, #detailContent .dt-head p i { color: #cfeee7; }
+    #detailContent .dt-body { padding: .2rem 1rem 1.2rem; }
+
+    /* ===== ログイン画面：灰色の背景 ＋ 深緑の帯 ＋ 白いカード（アプリ内と同じ） ===== */
+    #loginScreen { background: #f4f5f6 !important; }
+    #loginScreen > svg { display: none; }
+    #loginScreen::before { content: ''; position: fixed; left: 0; right: 0; top: 0; height: 17rem; background: #0e4d45; border-radius: 0 0 2rem 2rem; box-shadow: 0 6px 20px rgba(14,77,69,.25); }
+    #loginScreen > div { align-items: flex-start !important; padding-top: 2.4rem; }
+    #loginScreen .lg-card { box-shadow: 0 1px 2px rgba(14,77,69,.06), 0 10px 28px rgba(14,77,69,.14); border-radius: 1.25rem; }
+    #loginScreen #autoLoginStatus { color: #0e4d45; margin-top: 4rem; }
+    #loginScreen .login-anim-foot p { color: #5f6b76 !important; }
+    #loginScreen .login-anim-foot details { color: #0e4d45 !important; }
+    #loginScreen .login-anim-foot ul { color: #5f6b76 !important; }
+    #loginScreen .login-anim-foot > div:last-child { color: #8a97a3 !important; }
+
     /* ===== ヘッダー・下の操作パネル：白ベース（ロゴと選択色だけ深緑） ===== */
     #appHeader h1 { color: #0e4d45 !important; }
     #appHeader h1 + span { color: #5f6b76 !important; }
@@ -343,6 +376,86 @@
       visibility: visible;
       transition: transform 0.28s ease, visibility 0s linear 0s;
     }
+
+
+    /* ===== 詳細シート：下の操作パネルの上に浮かぶカード（スマホ） ===== */
+    @media (max-width: 639px) {
+      #detailSheet { left: .75rem; right: .75rem; bottom: calc(6.6rem + env(safe-area-inset-bottom, 0px)); border-radius: 1.5rem; border: 1px solid #e2e8f0;
+        max-height: calc(100dvh - 11.5rem); box-shadow: 0 10px 30px rgba(15,23,42,.22); padding-bottom: 0; }
+    }
+
+    /* ===== 一覧の並び替えチップ・状態バー ===== */
+    .chip-row { display: flex; gap: .4rem; overflow-x: auto; -ms-overflow-style: none; scrollbar-width: none; }
+    .chip-row::-webkit-scrollbar { display: none; }
+    .vchip { white-space: nowrap; }
+    #stateBar { position: fixed; left: .75rem; right: .75rem; top: calc(4.7rem + env(safe-area-inset-top, 0px)); z-index: 30; display: none; align-items: center; gap: .6rem;
+      padding: .55rem .8rem; border-radius: 1rem; font-size: .75rem; font-weight: 700; box-shadow: 0 6px 18px rgba(15,23,42,.18); }
+    #stateBar.show { display: flex; }
+    #stateBar button { margin-left: auto; flex: none; padding: .3rem .8rem; border-radius: 999px; font-weight: 800; background: rgba(255,255,255,.85); color: #0e4d45; }
+    #stateBar.s-error { background: #fee2e2; color: #991b1b; }
+    #stateBar.s-offline { background: #fef3c7; color: #854d0e; }
+    #stateBar.s-empty { background: #fff; color: #475569; border: 1px solid #e2e8f0; }
+    #stateBar.s-empty button { background: #0e4d45; color: #fff; }
+    @media (min-width: 640px) { #stateBar { left: 50%; right: auto; transform: translateX(-50%); min-width: 22rem; top: 5.2rem; } }
+
+    /* ===== ログイン画面：白いカードに深緑のアクセント ===== */
+    .lg-card { background: #fff; border-radius: 1.5rem; padding: 1.3rem 1.15rem 1.15rem; box-shadow: 0 18px 40px rgba(0,0,0,.28); }
+    .lg-label { color: #334155; }
+    .lg-muted { color: #64748b; }
+    .lg-input { background: #f6f8f9; border: 1px solid #e2e8f0; color: #0f172a; }
+    .lg-input::placeholder { color: #94a3b8; }
+    .lg-input:focus { border-color: #13685e; box-shadow: 0 0 0 3px rgba(19,104,94,.18); }
+    .lg-keybox { border-color: #94a3b8; }
+    .lg-ink { color: #1f2a37; }
+    .lg-err { color: #b91c1c; }
+    .lg-notice { color: #0e4d45; background: #e7f5f1; border: 1px solid #bfe3da; }
+    .lg-btn { background: #0e4d45; color: #fff; }
+    .lg-btn:active { background: #0a3a34; }
+
+    /* ===== ダークモード ===== */
+    html.dark { color-scheme: dark; }
+    .dark body { background: #0d141b; color: #e6eef4; }
+    .dark .bg-white { background-color: #17222c !important; }
+    .dark .bg-slate-50, .dark .bg-slate-100, .dark .bg-\[\#edf2f4\] { background-color: #1c2a36 !important; }
+    .dark .bg-slate-200 { background-color: #2a3a48 !important; }
+    .dark .hover\:bg-slate-100:hover, .dark .hover\:bg-slate-50:hover, .dark .hover\:bg-slate-200:hover { background-color: #223341 !important; }
+    .dark .text-slate-900, .dark .text-slate-800, .dark .text-slate-700 { color: #e6eef4 !important; }
+    .dark .text-slate-600 { color: #c3d0db !important; }
+    .dark .text-slate-500 { color: #9db0bf !important; }
+    .dark .text-slate-400, .dark .text-slate-300 { color: #7f93a3 !important; }
+    .dark .border-slate-100, .dark .border-slate-200, .dark .border-slate-300 { border-color: #2b3b49 !important; }
+    .dark .bg-emerald-50 { background-color: #12302b !important; }
+    .dark .border-emerald-200 { border-color: #1f5a4f !important; }
+    .dark .text-emerald-700, .dark .text-emerald-800 { color: #7fd8c4 !important; }
+    .dark .bg-red-50 { background-color: #3a1d1f !important; }
+    .dark .border-red-200, .dark .border-red-100 { border-color: #6b2f33 !important; }
+    .dark .text-red-700, .dark .text-red-600, .dark .text-red-500 { color: #fca5a5 !important; }
+    .dark .bg-amber-100, .dark .bg-\[\#fef3c7\] { background-color: #3d3217 !important; }
+    .dark .border-amber-300 { border-color: #7a5f1c !important; }
+    .dark .text-amber-900, .dark .text-amber-800, .dark .text-\[\#854d0e\] { color: #fde68a !important; }
+    .dark .text-\[\#13685e\] { color: #56c9b2 !important; }
+    .dark .border-\[\#13685e\] { border-color: #2f9d89 !important; }
+    .dark .text-sky-700, .dark .text-sky-600 { color: #7dd3fc !important; }
+    .dark input:not([type=checkbox]):not([type=radio]), .dark select, .dark textarea { background-color: #1c2a36 !important; color: #e6eef4 !important; border-color: #2b3b49 !important; }
+    .dark ::placeholder { color: #7f93a3 !important; }
+    .dark #appHeader { background: rgba(23,34,44,.97) !important; border-color: #2b3b49 !important; }
+    .dark #appHeader h1 { color: #7fe0cb !important; }
+    .dark #appHeader h1 + span { color: #9db0bf !important; }
+    .dark #hdrLogoMark svg path { fill: #7fe0cb; }
+    .dark #mobileBar { background: rgba(23,34,44,.96) !important; border-color: #2b3b49 !important; }
+    .dark .dock-btn { color: #9db0bf; }
+    .dark .dock-btn.dock-on { color: #56c9b2; }
+    .dark .dock-btn:active { background: #223341; }
+    .dark .page-modal, .dark #hamburgerDropdown { background: #0d141b !important; }
+    .dark #hamburgerDropdown > button { background: #17222c !important; color: #e6eef4 !important; }
+    .dark #hamburgerDropdown > button > i:first-child { background: rgba(86,201,178,.12); }
+    .dark .pg-body { background: #17222c !important; }
+    .dark #detailSheet { border-color: #2b3b49; }
+    .dark #stateBar.s-empty { background: #17222c; color: #c3d0db; border-color: #2b3b49; }
+    .dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.88) saturate(.75); }
+    .dark.map-photo .leaflet-tile-pane { filter: brightness(.82); }
+    .dark .leaflet-control-attribution { background: rgba(23,34,44,.8) !important; color: #9db0bf !important; }
+    .dark .leaflet-control-attribution a { color: #7fd8c4 !important; }
 
     /* ログイン画面：ロゴとフォームがふわっと現れる（動きを減らす設定の端末では無効） */
     @keyframes loginFadeUp {
@@ -500,10 +613,10 @@
       </div>
 
       <!-- ログインフォーム -->
-      <form id="loginForm" method="post" action="#" autocomplete="on" onsubmit="handleLogin(event)" class="mt-9 space-y-3.5 login-anim-form">
+      <form id="loginForm" method="post" action="#" autocomplete="on" onsubmit="handleLogin(event)" class="lg-card mt-8 space-y-3.5 login-anim-form">
         <!-- ログアウトしたときなどのお知らせ -->
-        <div id="loginNotice" class="hidden text-[13px] text-[#d9f7ee] bg-white/10 border border-white/20 rounded-xl px-3 py-2 flex items-start gap-2">
-          <i class="fas fa-circle-check mt-0.5 text-[#86efac]"></i>
+        <div id="loginNotice" class="lg-notice hidden text-[13px] rounded-xl px-3 py-2 flex items-start gap-2">
+          <i class="fas fa-circle-check mt-0.5" style="color:#13685e"></i>
           <span id="loginNoticeMsg"></span>
         </div>
 
@@ -512,13 +625,13 @@
           style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden;">
 
         <div>
-          <label for="passwordInput" class="block text-[13px] font-semibold text-[#e3f4f0] mb-1.5">パスワード</label>
+          <label for="passwordInput" class="lg-label block text-[13px] font-semibold mb-1.5">パスワード</label>
           <div class="relative">
-            <i class="fas fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-[#c4e6de] text-sm pointer-events-none"></i>
+            <i class="fas fa-lock lg-muted absolute left-3.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none"></i>
             <input type="password" id="passwordInput" name="password" required placeholder="パスワードを入力" autocomplete="current-password"
               enterkeyhint="go" autocapitalize="off" autocorrect="off" spellcheck="false" oninput="clearLoginMessages()"
-              class="w-full pl-10 pr-12 py-3 rounded-2xl bg-[#14625a] border border-[#3a8c80] text-white placeholder-[#a7d3cb] text-base focus:outline-none focus:ring-2 focus:ring-white/70 focus:border-transparent">
-            <button type="button" onclick="togglePasswordVisibility()" aria-label="パスワードの表示を切り替える" class="absolute right-1 top-1/2 -translate-y-1/2 text-[#c4e6de] hover:text-white p-3">
+              class="lg-input w-full pl-10 pr-12 py-3 rounded-2xl text-base focus:outline-none">
+            <button type="button" onclick="togglePasswordVisibility()" aria-label="パスワードの表示を切り替える" class="lg-muted absolute right-1 top-1/2 -translate-y-1/2 p-3">
               <i id="eyeIcon" class="fas fa-eye text-base"></i>
             </button>
           </div>
@@ -526,21 +639,21 @@
 
         <!-- ログイン状態を保つ -->
         <button type="button" id="keepLoginBtn" role="checkbox" aria-checked="false" onclick="toggleKeepLogin()" class="w-full flex items-start gap-3 text-left py-2">
-          <span id="keepLoginBox" class="mt-0.5 w-6 h-6 shrink-0 rounded-md border-2 border-[#a7d3cb] flex items-center justify-center transition">
-            <i id="keepLoginCheck" class="fas fa-check text-xs text-[#0e4d45] hidden"></i>
+          <span id="keepLoginBox" class="mt-0.5 w-6 h-6 shrink-0 rounded-md border-2 lg-keybox flex items-center justify-center transition">
+            <i id="keepLoginCheck" class="fas fa-check text-xs text-white hidden"></i>
           </span>
           <span class="flex flex-col">
-            <span class="text-sm font-semibold text-[#e3f4f0]">ログイン状態を保つ</span>
-            <span class="text-[11px] leading-snug text-[#b9ddd5] mt-0.5">30日間、この端末で保ちます。共有の端末では、チェックを外してください。</span>
+            <span class="lg-ink text-sm font-semibold">ログイン状態を保つ</span>
+            <span class="lg-muted text-[11px] leading-snug mt-0.5">30日間、この端末で保ちます。共有の端末では、チェックを外してください。</span>
           </span>
         </button>
 
-        <div id="loginError" class="hidden text-[13px] text-[#fecaca] flex items-start gap-1.5">
+        <div id="loginError" class="lg-err hidden text-[13px] flex items-start gap-1.5">
           <i class="fas fa-exclamation-circle mt-0.5"></i>
           <span id="loginErrorMsg">パスワードが正しくありません</span>
         </div>
 
-        <button type="submit" id="btnLoginSubmit" class="w-full py-3 rounded-2xl bg-white hover:bg-[#f0faf7] active:bg-[#dff2ed] disabled:opacity-70 text-[#0e4d45] font-bold text-base transition flex items-center justify-center gap-2">
+        <button type="submit" id="btnLoginSubmit" class="lg-btn w-full py-3 rounded-2xl disabled:opacity-70 font-bold text-base transition flex items-center justify-center gap-2">
           <span id="loginBtnText">ログイン</span>
           <i class="fas fa-arrow-right text-sm"></i>
         </button>
@@ -608,7 +721,7 @@
 
     <!-- マンション一覧ドロワー -->
     <div id="listDrawer" class="absolute top-0 right-0 h-full w-full sm:w-80 bg-white/95 backdrop-blur-md shadow-2xl z-30 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col border-l border-slate-200">
-      <div class="sheet-head px-3 pt-3 pb-2.5 bg-[#13685e] text-white flex flex-col gap-2.5 shrink-0 btn-touch-ui">
+      <div class="sheet-head px-3 pt-3 pb-2.5 bg-[#0e4d45] text-white flex flex-col gap-2.5 shrink-0 btn-touch-ui">
         <div class="sheet-grip -mt-1 mx-auto w-11 h-1.5 rounded-full bg-white/50"></div>
         <div class="flex items-center justify-between">
           <h3 class="font-bold text-sm flex items-center gap-2">
@@ -624,17 +737,24 @@
           <input type="text" id="mansionSearchInput" oninput="debouncedSearchInput()" placeholder="名前・住所・区域で検索（ひらがなOK）" class="w-full pl-8 pr-3 py-2 text-xs bg-white border border-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-300 text-slate-700 shadow-sm">
         </div>
         <div class="flex items-center gap-2 text-xs">
-          <div class="whitespace-nowrap text-emerald-50">該当 <span id="mansionSearchCount" class="font-bold text-white text-sm">0</span> 件</div>
+          <div class="whitespace-nowrap text-emerald-50">該当 <span id="mansionSearchCount" class="font-bold text-white text-sm">0</span> 件<span id="mansionTotalCount" class="text-[11px] opacity-80 ml-1"></span></div>
           <div class="ml-auto flex items-center gap-1.5">
-            <button type="button" id="btnSortDistance" onclick="toggleSortByDistance()" class="px-2.5 py-1 rounded-full text-[11px] font-bold border transition flex items-center gap-1 bg-white/10 text-white border-white/30">
-              <i class="fas fa-location-arrow text-[10px]"></i>
-              <span>近い順</span>
-            </button>
             <button onclick="loadMansionData(true)" class="px-2.5 py-1 rounded-full text-[11px] font-bold border border-white/30 bg-white/10 text-white flex items-center gap-1 transition hover:bg-white/20">
               <i class="fas fa-sync-alt text-[10px]"></i>
               <span>更新</span>
             </button>
           </div>
+        </div>
+        <div class="chip-row">
+          <button type="button" id="btnSortDistance" onclick="toggleSortByDistance()" class="vchip px-2.5 py-1 rounded-full text-[11px] font-bold border transition flex items-center gap-1 bg-white/10 text-white border-white/30">
+            <i class="fas fa-location-arrow text-[10px]"></i><span>近い順</span>
+          </button>
+          <button type="button" id="btnSortOldest" onclick="toggleSortOldest()" class="vchip px-2.5 py-1 rounded-full text-[11px] font-bold border transition flex items-center gap-1 bg-white/10 text-white border-white/30">
+            <i class="fas fa-clock-rotate-left text-[10px]"></i><span>訪問が古い順</span>
+          </button>
+          <button type="button" id="btnOnlyUnvisited" onclick="toggleOnlyUnvisited()" class="vchip px-2.5 py-1 rounded-full text-[11px] font-bold border transition flex items-center gap-1 bg-white/10 text-white border-white/30">
+            <i class="fas fa-eye-slash text-[10px]"></i><span>未訪問のみ</span>
+          </button>
         </div>
       </div>
 
@@ -645,6 +765,8 @@
         <i class="fas fa-arrow-up"></i>
       </button>
     </div>
+
+    <div id="stateBar" role="status"><i class="fas fa-circle-info"></i><span id="stateBarMsg"></span><button type="button" id="stateBarBtn" onclick="stateBarAction()"></button></div>
 
     <!-- ステータス表示（Toast）：シートやモーダルが開いていても見えるよう最前面 -->
     <div id="statusToast" class="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-[10004] bg-slate-900/90 text-white text-xs px-4 py-2.5 rounded-full shadow-lg backdrop-blur-sm flex items-center gap-2 transition-all duration-300 pointer-events-none opacity-0 max-w-[90vw]">
@@ -657,12 +779,12 @@
   <!-- マンション詳細シート（画面下から開く） -->
   <div id="detailSheet" class="fixed left-0 right-0 bottom-0 z-[40] bg-white rounded-t-3xl shadow-[0_-12px_32px_rgba(0,0,0,0.18)] border-t border-slate-100 max-h-[72dvh] overflow-y-auto sm:left-4 sm:right-auto sm:bottom-4 sm:w-[420px] sm:rounded-3xl sm:border btn-touch-ui">
     <div class="flex justify-center pt-2 sm:hidden">
-      <div class="w-10 h-1.5 rounded-full bg-slate-200"></div>
+      <div class="w-10 h-1.5 rounded-full bg-white/40"></div>
     </div>
     <button type="button" onclick="closeDetailSheet()" aria-label="詳細を閉じる" class="absolute top-3 right-3 w-9 h-9 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center z-10">
       <i class="fas fa-times text-base"></i>
     </button>
-    <div id="detailContent" class="px-4 pt-3 pb-5"></div>
+    <div id="detailContent"></div>
   </div>
 
   <!-- 絞り込みシート（区域） -->
@@ -707,6 +829,13 @@
       <div class="grid grid-cols-2 gap-2 mb-5">
         <button type="button" id="set-font-normal" onclick="applyFontSize('normal')" class="py-3 rounded-xl text-sm font-bold border transition">標準</button>
         <button type="button" id="set-font-large" onclick="applyFontSize('large')" class="py-3 rounded-xl text-base font-bold border transition">大きい</button>
+      </div>
+
+      <div class="text-[11px] font-bold text-slate-500 mb-1.5">画面の明るさ</div>
+      <div class="grid grid-cols-3 gap-2 mb-5">
+        <button type="button" id="set-theme-auto" onclick="applyTheme('auto')" class="py-3 rounded-xl text-sm font-bold border transition">自動</button>
+        <button type="button" id="set-theme-light" onclick="applyTheme('light')" class="py-3 rounded-xl text-sm font-bold border transition">ライト</button>
+        <button type="button" id="set-theme-dark" onclick="applyTheme('dark')" class="py-3 rounded-xl text-sm font-bold border transition">ダーク</button>
       </div>
 
       <div class="text-[11px] font-bold text-slate-500 mb-1.5">地図の種類</div>
@@ -1069,7 +1198,11 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.15-3';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.16-2';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    // オフライン対応：地図の画像とアプリ本体を、端末に保存する（HTTPSで開いたときだけ）
+    if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+      window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* 登録できなくても、アプリは通常どおり使えます */ }); });
+    }
     // 各ページの本文を .pg-body で包む（パソコンでは display:contents で見た目は変わらず、スマホでは白いカードになる）
     document.addEventListener('DOMContentLoaded', () => {
       ['settingsSheet', 'statsModal', 'adminCheckModal', 'reportModal', 'adminModal'].forEach(id => {
@@ -1259,6 +1392,7 @@
       if (!TILE_DEFS[type] || (type === 'maptiler' && !MAPTILER_API_KEY)) type = 'standard';
       mapType = type;
       storageSet(MAPTYPE_KEY, type);
+      refreshTheme();
       if (map) {
         if (baseLayer) map.removeLayer(baseLayer);
         const def = TILE_DEFS[type];
@@ -1297,6 +1431,9 @@
       };
       set('set-font-normal', fontSize === 'normal', 'text-sm');
       set('set-font-large', fontSize === 'large', 'text-base');
+      set('set-theme-auto', themeMode === 'auto', 'text-sm');
+      set('set-theme-light', themeMode === 'light', 'text-sm');
+      set('set-theme-dark', themeMode === 'dark', 'text-sm');
       set('set-map-standard', mapType === 'standard', 'text-sm');
       set('set-map-pale', mapType === 'pale', 'text-sm');
       set('set-map-photo', mapType === 'photo', 'text-sm');
@@ -1314,6 +1451,99 @@
     }
     function closeSettingsSheet() {
       hidePage(document.getElementById('settingsSheet'));
+    }
+
+
+    // ============================================================
+    // 画面の明るさ（自動／ライト／ダーク）
+    // ============================================================
+    const THEME_KEY = 'kk_theme';
+    let themeMode = (['auto', 'light', 'dark'].includes(storageGet(THEME_KEY))) ? storageGet(THEME_KEY) : 'auto';
+    function isDarkNow() {
+      return themeMode === 'dark' || (themeMode === 'auto' && window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    function refreshTheme() {
+      const dark = isDarkNow();
+      document.documentElement.classList.toggle('dark', dark);
+      document.documentElement.classList.toggle('map-photo', mapType === 'photo');
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', dark ? '#0d141b' : '#0e4d45');
+    }
+    function applyTheme(mode) {
+      themeMode = ['auto', 'light', 'dark'].includes(mode) ? mode : 'auto';
+      storageSet(THEME_KEY, themeMode);
+      refreshTheme();
+      updateSettingsUI();
+    }
+    try { matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (themeMode === 'auto') refreshTheme(); }); } catch (e) { /* 何もしない */ }
+    refreshTheme();
+
+    // ============================================================
+    // 最後に訪問した日（一覧の並び替え・「未訪問のみ」・各カードの表示）
+    // ============================================================
+    let visitMap = null;          // { 'シート名|物件名': '2026/10/12 14:00' }
+    let visitLoadedAt = 0;
+    let sortOldest = false;
+    let onlyUnvisited = false;
+
+    function visitStampOf(m) { return visitMap ? (visitMap[m.sheetName + '|' + m.name] || '') : null; }
+
+    function daysSinceStamp(stamp) {
+      const mt = String(stamp || '').match(/^(\d{4})\/(\d{1,2})\/(\d{1,2})/);
+      if (!mt) return null;
+      const d = new Date(Number(mt[1]), Number(mt[2]) - 1, Number(mt[3]));
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      return Math.max(0, Math.round((today - d) / 86400000));
+    }
+
+    // 「3日前」「2週間前」のような短い表示。まだ読み込めていないときは空
+    function visitLabelInfo(m) {
+      const st = visitStampOf(m);
+      if (st === null) return null;
+      if (!st) return { text: '未訪問', warm: true };
+      const n = daysSinceStamp(st);
+      if (n === null) return null;
+      let t = n === 0 ? '今日' : n === 1 ? '昨日' : n < 14 ? n + '日前' : n < 60 ? Math.floor(n / 7) + '週間前' : Math.floor(n / 30) + 'か月前';
+      return { text: '最終訪問 ' + t, warm: n >= 30 };
+    }
+
+    function visitTagHtml(m, big) {
+      const v = visitLabelInfo(m);
+      if (!v) return '';
+      const cls = v.warm ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-slate-50 text-slate-500 border-slate-200';
+      return `<span class="${cls} border px-2 py-0.5 rounded-full ${big ? 'text-[10px]' : 'text-[10px]'} font-bold inline-flex items-center gap-1"><i class="fas fa-clock-rotate-left text-[9px]"></i>${esc(v.text)}</span>`;
+    }
+
+    function loadVisitMap() {
+      visitLoadedAt = Date.now();
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res && res.success) {
+            visitMap = res.visits || {};
+            if (sortOldest || onlyUnvisited) { onFiltersChanged(); }
+            else if (isDrawerOpen) renderDrawerList(true);
+            if (currentDetailId !== null) renderDetailSheet();
+            updateSortUI();
+          }
+        })
+        .withFailureHandler(() => { visitLoadedAt = 0; })
+        .getMansionVisits(userAuthPassword);
+    }
+
+    function toggleSortOldest() {
+      if (!visitMap) { showToast('訪問の記録を読み込んでいます…', true); loadVisitMap(); return; }
+      sortOldest = !sortOldest;
+      if (sortOldest) sortByDistance = false;
+      updateSortUI();
+      renderDrawerList();
+    }
+
+    function toggleOnlyUnvisited() {
+      if (!visitMap) { showToast('訪問の記録を読み込んでいます…', true); loadVisitMap(); return; }
+      onlyUnvisited = !onlyUnvisited;
+      onFiltersChanged();
+      updateSortUI();
     }
 
     // ============================================================
@@ -1354,16 +1584,19 @@
       }
       sortWaitingForLocation = false;
       sortByDistance = !sortByDistance;
+      if (sortByDistance) sortOldest = false;
       updateSortUI();
       renderDrawerList();
     }
 
     function updateSortUI() {
-      const btn = document.getElementById("btnSortDistance");
-      if (!btn) return;
-      btn.className = sortByDistance
-        ? "px-2.5 py-1 rounded-full text-[11px] font-bold border transition flex items-center gap-1 bg-white text-[#13685e] border-white"
-        : "px-2.5 py-1 rounded-full text-[11px] font-bold border transition flex items-center gap-1 bg-white/10 text-white border-white/30";
+      const base = "vchip px-2.5 py-1 rounded-full text-[11px] font-bold border transition flex items-center gap-1 ";
+      const on = base + "bg-white text-[#0e4d45] border-white";
+      const off = base + "bg-white/10 text-white border-white/30";
+      const set = (id, active) => { const el = document.getElementById(id); if (el) el.className = active ? on : off; };
+      set('btnSortDistance', sortByDistance);
+      set('btnSortOldest', sortOldest);
+      set('btnOnlyUnvisited', onlyUnvisited);
     }
 
     function onLocationUpdated() {
@@ -1371,6 +1604,7 @@
       if (sortWaitingForLocation) {
         sortWaitingForLocation = false;
         sortByDistance = true;
+        sortOldest = false;
         updateSortUI();
         showToast("現在地から近い順に並べました", false);
         lastListCoords = null;
@@ -1513,7 +1747,7 @@
       let tx = size.x / 2;
       let ty = size.y / 2;
       if (window.innerWidth < 640) {
-        const avail = size.y - (sheet ? sheet.offsetHeight : 0);
+        const avail = size.y - (sheet ? sheet.offsetHeight : 0) - 105;
         ty = Math.max(avail / 2, 60);
       } else {
         tx = size.x / 2 + 210;
@@ -1553,7 +1787,7 @@
 
       // 「部屋番号一覧を見る」：スプレッドシートには飛ばず、アプリ内に部屋番号を表示
       const roomBtn = validRoomLink
-        ? `<button type="button" onclick="openRoomSheet(${Number(m.id)})" class="mt-4 flex items-center justify-center w-full px-4 py-3.5 bg-[#13685e] hover:bg-[#0e524a] active:bg-[#0a3f39] text-white font-bold rounded-2xl text-sm transition shadow-sm gap-2">
+        ? `<button type="button" onclick="openRoomSheet(${Number(m.id)})" class="mt-4 flex items-center justify-center w-full px-4 py-3.5 bg-[#0e4d45] hover:bg-[#0b3f38] active:bg-[#0a3a34] text-white font-bold rounded-2xl text-sm transition shadow-sm gap-2">
             <i class="fas fa-table-cells text-xs"></i>
             <span>部屋番号一覧を見る</span>
           </button>`
@@ -1576,26 +1810,30 @@
         : '';
 
       box.innerHTML = `
+        <div class="dt-head">
         <div class="pr-10 flex items-center gap-1.5 flex-wrap mb-2">
           ${buildAreaBadge(area)}
           <span style="background-color: ${esc(color.badgeBg)}; color: ${esc(color.badgeText)};" class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-block">${esc(m.sheetName)}</span>
-          ${urgentTag}${distTag}
+          ${urgentTag}${distTag}${visitTagHtml(m, true)}
         </div>
         <h3 class="text-base font-bold text-slate-900 leading-snug">${esc(m.name)}</h3>
         <p class="mt-1 text-sm text-slate-600 flex items-start gap-1.5">
           <i class="fas fa-location-dot text-slate-400 mt-1 shrink-0"></i>
           <span class="leading-snug">${esc(m.address || '住所未登録')}</span>
         </p>
+        </div>
+        <div class="dt-body">
         ${noteBox}
         ${roomBtn}
         ${adminBtn}
         ${pinEditBtn}
-        <button type="button" onclick="openRouteSheet(${Number(m.id)})" class="mt-2.5 flex items-center justify-center w-full px-2 py-3 bg-white border-2 border-[#13685e] text-[#13685e] font-bold rounded-2xl text-sm transition gap-1.5 hover:bg-emerald-50 active:bg-emerald-100">
+        <button type="button" onclick="openRouteSheet(${Number(m.id)})" class="mt-2.5 flex items-center justify-center w-full px-2 py-3 bg-white border-2 border-[#0e4d45] text-[#0e4d45] font-bold rounded-2xl text-sm transition gap-1.5 hover:bg-emerald-50 active:bg-emerald-100">
           <i class="fas fa-route text-xs"></i><span>ルート案内</span>
         </button>
         <button type="button" onclick="openReportModal(${Number(m.id)})" class="mt-2 flex items-center justify-center w-full px-3 py-2.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 font-semibold rounded-xl text-xs transition gap-1.5">
           <i class="fas fa-pen-to-square text-[11px]"></i><span>このマンションについて報告</span>
         </button>
+        </div>
       `;
     }
 
@@ -2362,6 +2600,8 @@
     function resetFilters() {
       currentSheetFilter = '';
       currentAreaFilter = 'ALL';
+      onlyUnvisited = false;
+      updateSortUI();
       updateFilterUI();
       onFiltersChanged();
     }
@@ -2400,7 +2640,7 @@
       const box = document.getElementById('keepLoginBox');
       const chk = document.getElementById('keepLoginCheck');
       if (btn) btn.setAttribute('aria-checked', keepLogin ? 'true' : 'false');
-      if (box) box.className = 'mt-0.5 w-6 h-6 shrink-0 rounded-md border-2 flex items-center justify-center transition ' + (keepLogin ? 'bg-white border-white' : 'border-[#a7d3cb]');
+      if (box) box.className = 'mt-0.5 w-6 h-6 shrink-0 rounded-md border-2 flex items-center justify-center transition ' + (keepLogin ? 'bg-[#0e4d45] border-[#0e4d45]' : 'lg-keybox');
       if (chk) chk.classList.toggle('hidden', !keepLogin);
     }
 
@@ -2878,9 +3118,71 @@
         .getMansionData(userAuthPassword, !!force);
     }
 
+
+    // ============================================================
+    // 状態バー（通信できない・オフライン・該当なし）
+    // ============================================================
+    let dataLoadError = '';        // 読み込みに失敗したときのメッセージ（成功したら空）
+    let stateBarMode = '';
+
+    function updateStateBar() {
+      const bar = document.getElementById('stateBar');
+      const msg = document.getElementById('stateBarMsg');
+      const btn = document.getElementById('stateBarBtn');
+      if (!bar || !msg || !btn) return;
+      let mode = '', text = '', label = '';
+      const hasData = mansionDataList.length > 0;
+      if (!hasData && dataLoadError) { mode = 'error'; text = 'データを読み込めませんでした'; label = '再試行'; }
+      else if (hasData && (navigator.onLine === false || dataLoadError)) { mode = 'offline'; text = navigator.onLine === false ? 'オフライン：前回のデータを表示中' : '通信できません：前回のデータを表示中'; label = '再試行'; }
+      else if (hasData && !isInitialLoading && getFilteredMansionList().length === 0) { mode = 'empty'; text = emptyReason().title; label = '条件を解除'; }
+      stateBarMode = mode;
+      bar.className = mode ? ('show s-' + mode) : '';
+      msg.textContent = text;
+      btn.textContent = label;
+    }
+
+    // 「該当なし」の理由を、条件に合わせて短く説明する
+    function emptyReason() {
+      if (onlyUnvisited && !searchTerms.length && !filtersActive()) return { title: '未訪問のマンションはありません', body: 'すべて訪問済みです。' };
+      if (searchTerms.length) return { title: '検索に合うマンションがありません', body: '言葉を変えるか、ひらがなでもお試しください。' };
+      if (filtersActive() || onlyUnvisited) return { title: '絞込に合うマンションがありません', body: '条件を少しゆるめてみてください。' };
+      return { title: '該当するマンションが見つかりません', body: '検索や絞込の条件を変えてみてください。' };
+    }
+
+    function clearSearchAll() {
+      ['mansionSearchInput', 'searchWindowInput'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      pendingSearchFit = false;
+      handleSearchInput();
+      updateDock();
+    }
+
+    // 「該当なし」のとき：検索・絞込・並び替えの条件をまとめて解除する
+    function clearAllNarrowing() {
+      if (searchTerms.length) clearSearchAll();
+      if (filtersActive()) resetFilters();
+      sortOldest = false;
+      onlyUnvisited = false;
+      updateSortUI();
+      renderMarkers(true);
+      renderDrawerList();
+    }
+
+    function stateBarAction() {
+      if (stateBarMode === 'empty') clearAllNarrowing();
+      else loadMansionData(true);
+    }
+
+    window.addEventListener('offline', () => { updateStateBar(); showToast('オフラインです。保存済みのデータを表示します', false); });
+    window.addEventListener('online', () => {
+      showToast('オンラインに戻りました。最新を確認します', false);
+      if (typeof userAuthPassword !== 'undefined' && userAuthPassword && document.getElementById('loginScreen').classList.contains('hidden')) loadMansionData(false);
+      updateStateBar();
+    });
+
     function onDataError(err) {
       console.error("GAS Execution Error: ", err);
       isInitialLoading = false;
+      dataLoadError = (err && err.message) || '通信エラー';
       const retry = { label: '再試行', ms: 10000, fn: () => loadMansionData(true) };
       if (mansionDataList.length > 0) {
         showToast("通信できないため、前回のデータを表示しています", false, retry);
@@ -2888,17 +3190,23 @@
         renderDrawerList();
         showToast("通信エラー: " + ((err && err.message) || String(err)), false, retry);
       }
+      updateStateBar();
     }
 
     function onDataLoaded(res) {
       isInitialLoading = false;
       if (!res || !res.success) {
-        showToast("データ取得失敗: " + (res ? res.error : "不明なエラー"), false);
+        dataLoadError = (res && res.error) || '不明なエラー';
+        showToast("データ取得失敗: " + dataLoadError, false);
         renderDrawerList();
+        updateStateBar();
         return;
       }
       applyMansionData(res.data || []);
       saveCachedMansions();
+      dataLoadError = '';
+      loadVisitMap();
+      updateStateBar();
       refreshAdminLinksQuietly();
       showToast(`${mansionDataList.length}件のマンションを取得しました`, false);
     }
@@ -2970,7 +3278,20 @@
         list = list.filter(m => searchTerms.every(t => m._search.includes(t)));
       }
 
-      if (sortByDistance && userCoordinates) {
+      if (onlyUnvisited && visitMap) {
+        list = list.filter(m => !visitMap[m.sheetName + '|' + m.name]);
+      }
+
+      if (sortOldest && visitMap) {
+        list = list.slice().sort((a, b) => {
+          const va = visitMap[a.sheetName + '|' + a.name] || '';
+          const vb = visitMap[b.sheetName + '|' + b.name] || '';
+          if (va !== vb) return va < vb ? -1 : 1;
+          const da = (a.distance === null || a.distance === undefined) ? Infinity : a.distance;
+          const db = (b.distance === null || b.distance === undefined) ? Infinity : b.distance;
+          return da - db;
+        });
+      } else if (sortByDistance && userCoordinates) {
         list = list.slice().sort((a, b) => {
           const da = (a.distance === null || a.distance === undefined) ? Infinity : a.distance;
           const db = (b.distance === null || b.distance === undefined) ? Infinity : b.distance;
@@ -3172,7 +3493,7 @@
     // 下の操作パネル：使っている機能のボタンだけ緑にする。もう一度押すと解除する
     let dockActive = null;   // 'home' / 'search' / 'loc' / null
     function setDockActive(name) { dockActive = name; updateDock(); }
-    function filtersActive() { return currentAreaFilter !== 'ALL' || !!currentSheetFilter; }
+    function filtersActive() { return currentAreaFilter !== 'ALL' || !!currentSheetFilter || onlyUnvisited; }
 
     function updateDock() {
       const on = 'flex-1 py-1.5 rounded-2xl flex flex-col items-center dock-btn dock-on';
@@ -3303,6 +3624,11 @@
     }
 
     function renderMarkers(shouldFitBounds = false) {
+      renderMarkersCore(shouldFitBounds);
+      updateStateBar();
+    }
+
+    function renderMarkersCore(shouldFitBounds = false) {
       if (!map || !markersLayer) return;
 
       markersLayer.clearLayers();
@@ -3355,15 +3681,31 @@
         return;
       }
 
+      if (mansionDataList.length === 0 && dataLoadError) {
+        container.innerHTML = `
+          <div class="text-center py-12 px-6 text-slate-500 text-xs">
+            <i class="fas ${navigator.onLine === false ? 'fa-wifi' : 'fa-triangle-exclamation'} text-3xl mb-3 text-slate-300"></i>
+            <p class="font-bold text-sm text-slate-700">${navigator.onLine === false ? 'オフラインです' : 'データを読み込めませんでした'}</p>
+            <p class="mt-1 leading-relaxed">電波の良い場所で、もう一度お試しください。</p>
+            <button type="button" onclick="loadMansionData(true)" class="mt-4 px-5 py-2.5 rounded-full bg-[#0e4d45] text-white font-bold text-xs"><i class="fas fa-rotate-right mr-1.5"></i>再試行</button>
+          </div>`;
+        if (countEl) countEl.textContent = '0';
+        return;
+      }
+
       const prevScroll = container.scrollTop;
       const filteredList = getFilteredMansionList();
       if (countEl) countEl.textContent = filteredList.length;
+      const totEl = document.getElementById('mansionTotalCount');
+      if (totEl) totEl.textContent = (filteredList.length !== mansionDataList.length) ? '（全 ' + mansionDataList.length + ' 件中）' : '';
 
       if (filteredList.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-10 text-slate-400 text-xs">
-            <i class="fas fa-search-minus text-2xl mb-2 text-slate-300"></i>
-            <p>該当するマンションが見つかりません</p>
+          <div class="text-center py-12 px-6 text-slate-500 text-xs">
+            <i class="fas fa-search-minus text-3xl mb-3 text-slate-300"></i>
+            <p class="font-bold text-sm text-slate-700">${esc(emptyReason().title)}</p>
+            <p class="mt-1 leading-relaxed">${esc(emptyReason().body)}</p>
+            <button type="button" onclick="clearAllNarrowing()" class="mt-4 px-5 py-2.5 rounded-full bg-[#0e4d45] text-white font-bold text-xs"><i class="fas fa-filter-circle-xmark mr-1.5"></i>条件を解除</button>
           </div>`;
         return;
       }
@@ -3428,7 +3770,7 @@
             <div class="flex items-center gap-1.5 flex-wrap">
               ${buildAreaBadge(area)}
               <span style="background-color: ${esc(color.badgeBg)}; color: ${esc(color.badgeText)};" class="px-2 py-0.5 rounded-full text-[10px] font-bold">${esc(m.sheetName)}</span>
-              ${urgentCardBadge}${distBadge}
+              ${urgentCardBadge}${visitTagHtml(m)}${distBadge}
             </div>
             ${noteLine}
             <h4 class="font-bold text-slate-900 text-sm mt-0.5 flex items-center gap-1.5"><span>${esc(m.name)}</span></h4>
@@ -3562,6 +3904,7 @@
         closeDetailSheet();
         setSheetState('half');
         drawer.classList.remove("translate-x-full");
+        if (visitMap && Date.now() - visitLoadedAt > 60000) loadVisitMap();
         if (btnList) {
           btnList.innerHTML = `<i class="fas fa-map text-xs"></i><span>地図</span>`;
         }
