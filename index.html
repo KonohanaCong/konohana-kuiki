@@ -248,6 +248,7 @@
     #mobileBar { background: rgba(255,255,255,0.96) !important; border-color: #e2e8f0 !important; }
     .dock-btn:active { background: #f1f5f9; }
     .dock-btn { color: #475569; position: relative; }   /* ヘッダーのメニューアイコンと同じ色 */
+    .dock-btn.dock-has::after { content: ''; position: absolute; top: .3rem; left: 50%; margin-left: .55rem; width: .55rem; height: .55rem; border-radius: 50%; background: #e11d48; box-shadow: 0 0 0 2px #fff; }
     .dock-btn.dock-on { background: #13685e; color: #ffffff; }   /* 選択中：緑のタイルに白いアイコンと文字 */
 
     /* ===== メニュー・各ページ（スマホは全画面で右から出る） ===== */
@@ -1197,7 +1198,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.16-7';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.16-8';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     // オフライン対応：地図の画像とアプリ本体を、端末に保存する（HTTPSで開いたときだけ）
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* 登録できなくても、アプリは通常どおり使えます */ }); });
@@ -2517,6 +2518,9 @@
     function openFilterSheet() {
       closeHamburgerMenu();
       renderFilterSheet();
+      if (window.innerWidth < 640 && isDrawerOpen) toggleMansionListDrawer();   // 開く画面は1つだけ
+      closeSearchWindow();
+      if (dockActive === 'home' || dockActive === 'loc') dockActive = null;
       document.body.classList.add('filter-open');   // スマホ：下の操作パネルを、全画面の上に出しておく
       showPage(document.getElementById('filterSheet'));
       updateDock();
@@ -3506,14 +3510,16 @@
       const state = {
         'dock-home': dockActive === 'home',
         'mobileListBtn': !!isDrawerOpen,
-        'dock-search': searchOpen || searchTerms.length > 0,
+        'dock-search': searchOpen,          // 緑は「いま開いている画面」だけ（1つだけ）
         'dock-loc': dockActive === 'loc',
-        'dock-filter': filterOpen || filtersActive()
+        'dock-filter': filterOpen
       };
+      // 条件が残っているとき（検索の言葉・絞込）は、緑ではなく小さな赤い点で知らせる
+      const hasCond = { 'dock-search': searchTerms.length > 0, 'dock-filter': filtersActive() };
       Object.keys(state).forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.className = (state[id] ? on : off) + (id === 'dock-search' ? ' relative' : '');
+        el.className = (state[id] ? on : off) + (id === 'dock-search' ? ' relative' : '') + (!state[id] && hasCond[id] ? ' dock-has' : '');
         el.setAttribute('aria-pressed', state[id] ? 'true' : 'false');
       });
     }
@@ -3524,26 +3530,19 @@
       goHome();
     }
 
-    // 検索：検索中なら、検索を解除する。そうでなければ検索の窓を開く
+    // 検索：開いていれば閉じる（緑も消える）。閉じていれば開く
     function dockSearch() {
       const win = document.getElementById('searchWindow');
       const open = !!(win && !win.classList.contains('hidden'));
-      if (!open && searchTerms.length > 0) {
-        ['mansionSearchInput', 'searchWindowInput'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-        pendingSearchFit = false;
-        handleSearchInput();
-        updateDock();
-        return;
-      }
+      if (open) { closeSearchWindow(); return; }
       openSearchScreen();
     }
 
-    // 絞込：絞り込み中なら、絞り込みを解除する。そうでなければ絞込シートを開く
+    // 絞込：開いていれば閉じる（緑も消える）。閉じていれば開く
     function dockFilter() {
       const fs = document.getElementById('filterSheet');
-      const open = !!(fs && !fs.classList.contains('hidden'));
-      if (!open && filtersActive()) { resetFilters(); updateDock(); return; }
-      closeSearchWindow();
+      const open = !!(fs && !fs.classList.contains('hidden') && !fs.classList.contains('page-out'));
+      if (open) { closeFilterSheet(); return; }
       openFilterSheet();
     }
 
@@ -3816,7 +3815,9 @@
     // 検索ボタン：検索の窓だけを開く（入力すると地図のピン・一覧が絞り込まれる）
     function openSearchScreen() {
       closeHamburgerMenu();
-      if (window.innerWidth < 640 && isDrawerOpen) toggleMansionListDrawer();   // 一覧は閉じて、検索だけを開く
+      if (window.innerWidth < 640 && isDrawerOpen) toggleMansionListDrawer();   // 一覧・絞込は閉じて、検索だけを開く
+      const fsh = document.getElementById('filterSheet');
+      if (fsh && !fsh.classList.contains('hidden') && !fsh.classList.contains('page-out')) closeFilterSheet();
       dockActive = 'search';
       updateDock();
       const main = document.getElementById('mansionSearchInput');
@@ -3898,9 +3899,11 @@
       isDrawerOpen = !isDrawerOpen;
 
       if (isDrawerOpen) {
-        if (window.innerWidth < 640) {   // 検索の窓は閉じて、一覧だけを開く
+        if (window.innerWidth < 640) {   // 検索の窓・絞込は閉じて、一覧だけを開く
           const sw = document.getElementById('searchWindow');
           if (sw && !sw.classList.contains('hidden')) closeSearchWindow();
+          const fsh = document.getElementById('filterSheet');
+          if (fsh && !fsh.classList.contains('hidden') && !fsh.classList.contains('page-out')) closeFilterSheet();
         }
         closeDetailSheet();
         setSheetState('half');
@@ -3972,7 +3975,9 @@
     }
 
     function moveToCurrentLocation() {
-      closeSearchWindow();   // 検索の窓が開いていたら閉じて、すぐ現在地へ
+      closeSearchWindow();   // 検索の窓・絞込・一覧が開いていたら閉じて、すぐ現在地へ
+      closeFilterSheet();
+      if (window.innerWidth < 640 && isDrawerOpen) toggleMansionListDrawer();
       // 緑の状態でもう一度押したら、緑を解除してホームの表示に戻る
       if (dockActive === 'loc') { goHome(true); return; }
       if (userCoordinates && map) {
