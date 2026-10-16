@@ -451,6 +451,16 @@
     .dark #loginScreen .lg-keybox { border-color: #5d7283; }
     .dark #loginScreen .lg-notice { background: #12302b; border-color: #1f5a4f; color: #7fd8c4; }
     .dark #loginScreen .lg-err { color: #fca5a5; }
+    /* ダーク：入力欄・選択欄・統計の数字・色付きの札が、見えにくくならないように */
+    .dark #reportModal input:not([type=checkbox]):not([type=radio]), .dark #reportModal select, .dark #reportModal textarea { background: #1c2a36 !important; border-color: #2b3b49 !important; color: #e6eef4 !important; }
+    .dark select option { background: #1c2a36; color: #e6eef4; }
+    .dark #statsBody td[style*="rgba(5,150,105"] { color: #e8fff8 !important; }
+    .dark #statsBody td[style*="#f8fafc"], .dark #statsBody td[style*="#f1f5f9"] { background: #1c2a36 !important; color: #8fa3b3 !important; }
+    .dark [style*="background:#d1fae5"], .dark [style*="background-color:#d1fae5"] { background: #12302b !important; color: #7fe0cb !important; }
+    .dark [style*="background:#e0f2fe"] { background: #12293a !important; color: #7dd3fc !important; }
+    .dark [style*="background-color:#dbeafe"] { background: #12263f !important; color: #93c5fd !important; }
+    .dark [style*="color:#047857"] { color: #5eead4 !important; }
+    .dark #routeAppleLink, .dark #routeAppleLink i, .dark #routeAppleLink span { color: #e6eef4 !important; }
     .dark #stateBar.s-empty { background: #17222c; color: #c3d0db; border-color: #2b3b49; }
     .dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(.92) contrast(.88) saturate(.75); }
     .dark.map-photo .leaflet-tile-pane { filter: brightness(.82); }
@@ -1198,7 +1208,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.16-8';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.16-9';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     // オフライン対応：地図の画像とアプリ本体を、端末に保存する（HTTPSで開いたときだけ）
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* 登録できなくても、アプリは通常どおり使えます */ }); });
