@@ -247,11 +247,8 @@
     #hdrLogoMark svg path { fill: #0e4d45; }
     #mobileBar { background: rgba(255,255,255,0.96) !important; border-color: #e2e8f0 !important; }
     .dock-btn:active { background: #f1f5f9; }
-    .dock-btn { color: #64748b; position: relative; }
-    .dock-btn.dock-on { background: transparent; color: #0e4d45; }
-    .dock-btn.dock-on span { font-weight: 800; }
-    .dock-btn.dock-on i { transform: scale(1.15); }
-    .dock-btn i { transition: transform .15s ease; }
+    .dock-btn { color: #475569; position: relative; }   /* ヘッダーのメニューアイコンと同じ色 */
+    .dock-btn.dock-on { background: #13685e; color: #ffffff; }   /* 選択中：緑のタイルに白いアイコンと文字 */
 
     /* ===== メニュー・各ページ（スマホは全画面で右から出る） ===== */
     .menu-page-head, .menu-chev, .ic-mob, .menu-foot { display: none; }
@@ -431,8 +428,8 @@
     .dark #appHeader h1 + span { color: #9db0bf !important; }
     .dark #hdrLogoMark svg path { fill: #7fe0cb; }
     .dark #mobileBar { background: rgba(23,34,44,.96) !important; border-color: #2b3b49 !important; }
-    .dark .dock-btn { color: #9db0bf; }
-    .dark .dock-btn.dock-on { color: #56c9b2; }
+    .dark .dock-btn { color: #c3d0db; }
+    .dark .dock-btn.dock-on { background: #13685e; color: #fff; }
     .dark .dock-btn:active { background: #223341; }
     .dark .page-modal, .dark #hamburgerDropdown { background: #0d141b !important; }
     .dark #hamburgerDropdown > button { background: #17222c !important; color: #e6eef4 !important; }
@@ -1195,7 +1192,7 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.16-5';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.16-6';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     // オフライン対応：地図の画像とアプリ本体を、端末に保存する（HTTPSで開いたときだけ）
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* 登録できなくても、アプリは通常どおり使えます */ }); });
