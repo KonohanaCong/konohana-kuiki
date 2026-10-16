@@ -281,6 +281,11 @@
       #statusToast { bottom: 7.6rem !important; }
       #statusToast { background: #0e4d45 !important; font-size: .8rem; font-weight: 600; padding: .65rem 1.2rem; }
       #searchWindow { bottom: calc(6.6rem + env(safe-area-inset-bottom, 0px)); }   /* 下の操作パネルは、検索中も押せる */
+      /* 絞込：全画面のページ。下の操作パネルは、ページの上に出したまま（「絞込」が選択中の表示） */
+      body.filter-open #mobileBar { z-index: 10003; }
+      #filterSheet > div { padding-bottom: calc(6.8rem + env(safe-area-inset-bottom, 0px)) !important; }
+      #filterSheet > div > .pg-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+      #filterSheet #filterSheetList { flex: 1 1 auto; min-height: 8rem; }
       #mobileBar.on { display: flex; flex-direction: column; z-index: 35; }
       /* メニュー：全画面の一覧 */
       #hamburgerDropdown { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0; width: auto !important; max-width: none;
@@ -782,7 +787,7 @@
   </div>
 
   <!-- 絞り込みシート（区域） -->
-  <div id="filterSheet" class="hidden fixed inset-0 z-[10002] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeFilterSheet()">
+  <div id="filterSheet" class="page-modal page-anim hidden fixed inset-0 z-[10002] bg-slate-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 btn-touch-ui" onclick="closeFilterSheet()">
     <div onclick="event.stopPropagation()" class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-100 p-5 sm:p-6 pb-7 max-h-[88dvh] flex flex-col">
       <div class="flex items-center justify-between mb-3 shrink-0">
         <div class="flex items-center gap-2 text-slate-800 font-bold text-lg">
@@ -790,7 +795,7 @@
           <span>絞り込み</span>
         </div>
         <button type="button" onclick="closeFilterSheet()" aria-label="閉じる" class="text-slate-400 hover:text-slate-600 p-2 rounded-full hover:bg-slate-100 transition">
-          <i class="fas fa-times text-lg"></i>
+          <i class="fas fa-times text-lg ic-desk"></i><i class="fas fa-chevron-left text-lg ic-mob"></i>
         </button>
       </div>
 
@@ -1192,14 +1197,14 @@
     const CACHE_KEY = 'konohana_mansion_cache_v2';
     const OLD_CACHE_KEYS = ['konohana_mansion_cache_v1'];   // 旧版（リンクURLが入っていた）は削除する
     const PWHASH_KEY = 'konohana_pw_hash_v1';
-    const APP_VERSION = '2026.10.16-6';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
+    const APP_VERSION = '2026.10.16-7';                 // 画面を更新したら、この番号も変える（古い画面の検出に使う）
     // オフライン対応：地図の画像とアプリ本体を、端末に保存する（HTTPSで開いたときだけ）
     if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
       window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => { /* 登録できなくても、アプリは通常どおり使えます */ }); });
     }
     // 各ページの本文を .pg-body で包む（パソコンでは display:contents で見た目は変わらず、スマホでは白いカードになる）
     document.addEventListener('DOMContentLoaded', () => {
-      ['settingsSheet', 'statsModal', 'adminCheckModal', 'reportModal', 'adminModal'].forEach(id => {
+      ['settingsSheet', 'statsModal', 'adminCheckModal', 'reportModal', 'adminModal', 'filterSheet'].forEach(id => {
         const inner = document.querySelector('#' + id + ' > div');
         if (!inner || inner.querySelector(':scope > .pg-body')) return;
         const kids = Array.from(inner.children).slice(1);
@@ -2512,13 +2517,15 @@
     function openFilterSheet() {
       closeHamburgerMenu();
       renderFilterSheet();
-      document.getElementById('filterSheet').classList.remove('hidden');
+      document.body.classList.add('filter-open');   // スマホ：下の操作パネルを、全画面の上に出しておく
+      showPage(document.getElementById('filterSheet'));
       updateDock();
     }
     function closeFilterSheet() {
       const el = document.getElementById('filterSheet');
-      if (el) el.classList.add('hidden');
+      hidePage(el);
       updateDock();
+      setTimeout(() => { if (el && el.classList.contains('hidden')) document.body.classList.remove('filter-open'); }, 260);
     }
     function renderFilterSheetIfOpen() {
       const el = document.getElementById('filterSheet');
@@ -3495,7 +3502,7 @@
       const win = document.getElementById('searchWindow');
       const searchOpen = !!(win && !win.classList.contains('hidden'));
       const fs = document.getElementById('filterSheet');
-      const filterOpen = !!(fs && !fs.classList.contains('hidden'));
+      const filterOpen = !!(fs && !fs.classList.contains('hidden') && !fs.classList.contains('page-out'));
       const state = {
         'dock-home': dockActive === 'home',
         'mobileListBtn': !!isDrawerOpen,
